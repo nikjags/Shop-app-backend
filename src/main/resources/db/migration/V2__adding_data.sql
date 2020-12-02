@@ -50,7 +50,7 @@ VALUES
 (1, PARSEDATETIME('04.05.2020 17:32:00', 'dd.MM.yyyy hh:mm:ss'), TRUE),
 (1, PARSEDATETIME('05.05.2020 08:58:00', 'dd.MM.yyyy hh:mm:ss'), FALSE);
 
-INSERT INTO ordered_products (order_id, product_id)
+INSERT INTO orders_product (order_id, product_id)
 VALUES
 (1, 1),
 (1, 6),

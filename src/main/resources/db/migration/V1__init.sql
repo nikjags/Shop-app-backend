@@ -23,7 +23,7 @@ CREATE TABLE orders (
   delivered boolean NOT NULL
 );
 
-CREATE TABLE ordered_products (
+CREATE TABLE orders_product (
   order_id int NOT NULL,
   product_id int NOT NULL
 );
@@ -37,8 +37,8 @@ CREATE TABLE stock (
 
 ALTER TABLE orders ADD FOREIGN KEY (customer_id) REFERENCES customer (id);
 
-ALTER TABLE ordered_products ADD FOREIGN KEY (order_id) REFERENCES orders (id);
+ALTER TABLE orders_product ADD FOREIGN KEY (order_id) REFERENCES orders (id);
 
-ALTER TABLE ordered_products ADD FOREIGN KEY (product_id) REFERENCES product (id);
+ALTER TABLE orders_product ADD FOREIGN KEY (product_id) REFERENCES product (id);
 
 ALTER TABLE stock ADD FOREIGN KEY (product_id) REFERENCES product (id);

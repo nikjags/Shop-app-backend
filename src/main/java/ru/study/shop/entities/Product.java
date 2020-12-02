@@ -21,7 +21,7 @@ public class Product implements Serializable {
     private String material;
     private String manufacturer;
     private String description;
-    private String price;
+    private Long price;
 
     public Product(
         String productName,
@@ -29,7 +29,7 @@ public class Product implements Serializable {
         String material,
         String manufacturer,
         String description,
-        String price) {
+        Long price) {
         this.productName = productName;
         this.productType = productType;
         this.material = material;
@@ -89,11 +89,11 @@ public class Product implements Serializable {
         this.description = description;
     }
 
-    public String getPrice() {
+    public Long getPrice() {
         return price;
     }
 
-    public void setPrice(String price) {
+    public void setPrice(Long price) {
         this.price = price;
     }
 }

@@ -16,6 +16,8 @@
 
 	<properties>
 		<java.version>8</java.version>
+		<flyway.version>7.2.0</flyway.version>
+		<unitils-mock.version>3.4.6</unitils-mock.version>
 	</properties>
 
 	<dependencies>
@@ -36,20 +38,26 @@
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-maven-plugin</artifactId>
-			<version>7.2.0</version>
+			<version>${flyway.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.junit.vintage</groupId>
-					<artifactId>junit-vintage-engine</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+		<dependency>
+			<groupId>org.unitils</groupId>
+			<artifactId>unitils-easymock</artifactId>
+			<version>${unitils-mock.version}</version>
+			<scope>test</scope>
+		</dependency>
+    </dependencies>
+
 
 	<build>
 		<plugins>

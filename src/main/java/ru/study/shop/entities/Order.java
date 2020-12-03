@@ -2,6 +2,7 @@ package ru.study.shop.entities;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -21,7 +22,7 @@ public class Order {
         joinColumns = @JoinColumn(name = "order_id"),
         inverseJoinColumns = @JoinColumn(name = "product_id")
     )
-    private List<Product> productList;
+    private List<Product> productList = new ArrayList<>();
 
     private LocalDateTime orderedTime;
 

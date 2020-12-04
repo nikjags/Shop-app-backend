@@ -18,7 +18,6 @@ public class Customer {
     }
 
     public Customer(String firstName, String lastName, String login, String email) {
-        this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.login = login;

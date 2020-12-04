@@ -8,6 +8,9 @@ public class StockId implements Serializable {
 
     private String size;
 
+    public StockId() {
+    }
+
     public StockId(Product product, String size) {
         this.product = product;
         this.size = size;

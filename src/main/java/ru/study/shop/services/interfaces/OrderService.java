@@ -27,5 +27,4 @@ public interface OrderService {
     void deleteAll(List<Order> orders);
 
     Long getTotalPrice(Order order);
-
 }

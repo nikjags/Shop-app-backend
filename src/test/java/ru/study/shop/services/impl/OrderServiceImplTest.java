@@ -78,7 +78,7 @@ public class OrderServiceImplTest {
         expect(orderRepository.findAll()).andReturn(emptyList());
         replay();
 
-        List<Order> orderList = orderService.findByProduct(new Product());
+        List<Order> orderList = orderService.findByProduct(null);
 
         assertEquals(emptyList(), orderList);
     }

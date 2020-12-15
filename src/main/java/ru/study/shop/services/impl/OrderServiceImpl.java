@@ -74,7 +74,11 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Long getTotalPrice(Order order) {
-        return order.getProductList().stream().map(Product::getPrice).collect(Collectors.toList()).stream().reduce((long) 0, (Long::sum));
+        return order.getProductList().stream()
+            .map(Product::getPrice)
+            .collect(Collectors.toList())
+            .stream()
+            .reduce((long) 0, (Long::sum));
     }
 
     @Override

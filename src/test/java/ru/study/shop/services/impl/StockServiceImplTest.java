@@ -15,6 +15,7 @@ import ru.study.shop.services.interfaces.StockService;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.util.Lists.emptyList;
 import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.*;
 import static org.unitils.easymock.EasyMockUnitils.replay;
@@ -70,7 +71,7 @@ public class StockServiceImplTest {
 
         List<Stock> result = stockService.findByProduct(null);
 
-        assertEquals(Lists.emptyList(), result);
+        assertEquals(emptyList(), result);
     }
 
     @Test
@@ -79,7 +80,7 @@ public class StockServiceImplTest {
         replay();
 
         List<Stock> result = stockService.findByProduct(PRODUCT_NOT_REPRESENTED_IN_LIST);
-        assertEquals(Lists.emptyList(), result);
+        assertEquals(emptyList(), result);
 
     }
 
@@ -106,7 +107,7 @@ public class StockServiceImplTest {
 
         List<Stock> result = stockService.findEmptyStocks();
 
-        assertEquals(Lists.emptyList(), result);
+        assertEquals(emptyList(), result);
 
     }
 
@@ -131,7 +132,7 @@ public class StockServiceImplTest {
 
         List<Stock> result = stockService.findBySize(SIZE_NOT_REPRESENTED_IN_STOCK);
 
-        assertEquals(Lists.emptyList(), result);
+        assertEquals(emptyList(), result);
     }
 
     @Test

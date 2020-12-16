@@ -1,7 +1,6 @@
 
 package ru.study.shop.services.interfaces;
 
-import ru.study.shop.entities.Order;
 import ru.study.shop.entities.Product;
 
 import java.util.List;
@@ -12,6 +11,8 @@ public interface ProductService {
     List<Product> findByName(String name);
 
     List<Product> findByType(String type);
+
+    List<Product> findByMaterial(String material);
 
     List<Product> findByManufacturer(String manufacturer);
 

@@ -38,6 +38,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public List<Product> findByMaterial(String material) {
+        return productRepository.findAll().stream()
+            .filter(product -> product.getMaterial().equals(material))
+            .collect(Collectors.toList());
+    }
+
+    @Override
     public List<Product> findByManufacturer(String manufacturer) {
         return productRepository.findAll().stream()
             .filter(product -> product.getManufacturer().equals(manufacturer))

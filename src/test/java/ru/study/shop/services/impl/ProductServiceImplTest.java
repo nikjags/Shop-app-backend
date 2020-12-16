@@ -41,6 +41,9 @@ public class ProductServiceImplTest {
     private static final String PRODUCT_MANUFACTURER_REPRESENTED_IN_LIST_ONCE = "Материал 2";
     private static final String PRODUCT_MANUFACTURER_REPRESENTED_IN_LIST_SEVERAL_TIMES = "Материал 1";
     private static final String PRODUCT_MANUFACTURER_NOT_REPRESENTED_IN_LIST = "Материал продукта не в списке";
+    public static final long MAX_PRICE_FROM_LIST = 8000L;
+    public static final long MIN_POSSIBLE_PRICE = 0L;
+    public static final long MEDIAN_PRICE = 4050L;
 
     @Mock
     private ProductRepository productRepository;
@@ -260,6 +263,87 @@ public class ProductServiceImplTest {
 
         assertEquals(PRODUCT_LIST.stream()
                 .filter(product -> product.getManufacturer().equals(PRODUCT_MANUFACTURER_REPRESENTED_IN_LIST_SEVERAL_TIMES))
+                .collect(Collectors.toList()),
+            result);
+    }
+
+    @Test
+    public void findFromPriceToPriceBothNull() {
+        List<Product> result = productService.findFromPriceToPrice(null, null);
+
+        assertEquals(Lists.emptyList(), result);
+    }
+
+    @Test
+    public void findFromPriceToPriceFirstPriceIsNull() {
+        expect(productRepository.findAll()).andReturn(PRODUCT_LIST);
+        replay();
+
+        List<Product> result = productService.findFromPriceToPrice(null, MAX_PRICE_FROM_LIST);
+
+        assertEquals(PRODUCT_LIST, result);
+    }
+
+    @Test
+    public void findFromPriceToPriceSecondPriceIsNull() {
+        expect(productRepository.findAll()).andReturn(PRODUCT_LIST);
+        replay();
+
+        List<Product> result = productService.findFromPriceToPrice(0L, null);
+
+        assertEquals(PRODUCT_LIST, result);
+    }
+
+    public void findFromPriceToPriceFirstPriceIsGreaterThanSecondPrice() {
+        expect(productRepository.findAll()).andReturn(PRODUCT_LIST);
+
+        List<Product> result = productService.findFromPriceToPrice(MAX_PRICE_FROM_LIST, MIN_POSSIBLE_PRICE);
+
+        assertEquals(PRODUCT_LIST, result);
+    }
+
+    public void findFromPriceToPriceNoPricesInInterval() {
+        expect(productRepository.findAll()).andReturn(PRODUCT_LIST);
+        replay();
+
+        List<Product> result = productService.findFromPriceToPrice(MAX_PRICE_FROM_LIST + 1L, Long.MAX_VALUE);
+
+        assertEquals(Lists.emptyList(), result);
+    }
+
+    public void findFromPriceToPriceIntervalContainsAllProducts() {
+        expect(productRepository.findAll()).andReturn(PRODUCT_LIST);
+        replay();
+
+        List<Product> result = productService.findFromPriceToPrice(MIN_POSSIBLE_PRICE, MAX_PRICE_FROM_LIST);
+
+        assertEquals(PRODUCT_LIST, result);
+    }
+
+    public void findFromPriceToPriceFromMinPriceToMedianPrice() {
+        expect(productRepository.findAll()).andReturn(PRODUCT_LIST);
+        replay();
+
+        List<Product> result = productService.findFromPriceToPrice(MIN_POSSIBLE_PRICE, MEDIAN_PRICE);
+
+        assertEquals(PRODUCT_LIST.stream()
+        .filter(product ->
+            product.getPrice().compareTo(MIN_POSSIBLE_PRICE) >= 0
+                && product.getPrice().compareTo(MEDIAN_PRICE) <= 0)
+            .collect(Collectors.toList()),
+            result);
+    }
+
+    public void findFromPriceToPriceFromMedianPriceToMaxPrice() {
+        expect(productRepository.findAll()).andReturn(PRODUCT_LIST);
+        replay();
+
+        List<Product> result = productService.findFromPriceToPrice(MEDIAN_PRICE, MAX_PRICE_FROM_LIST);
+
+        assertEquals(PRODUCT_LIST.stream()
+                .filter(product ->
+                    product.getPrice().compareTo(MEDIAN_PRICE) >= 0
+                        && product.getPrice().compareTo(MAX_PRICE_FROM_LIST) <= 0)
                 .collect(Collectors.toList()),
             result);
     }

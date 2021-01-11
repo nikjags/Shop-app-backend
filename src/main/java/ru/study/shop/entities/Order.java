@@ -1,5 +1,7 @@
 package ru.study.shop.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -22,6 +24,7 @@ public class Order {
         joinColumns = @JoinColumn(name = "order_id"),
         inverseJoinColumns = @JoinColumn(name = "product_id")
     )
+    @JsonProperty(value = "Products")
     private List<Product> productList = new ArrayList<>();
 
     private LocalDateTime orderedTime;

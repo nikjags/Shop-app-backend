@@ -9,6 +9,7 @@ import ru.study.shop.services.interfaces.OrderService;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,6 +24,11 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<Order> findAll() {
         return orderRepository.findAll();
+    }
+
+    @Override
+    public Optional<Order> findById(Long orderId) {
+        return orderRepository.findById(orderId);
     }
 
     @Override

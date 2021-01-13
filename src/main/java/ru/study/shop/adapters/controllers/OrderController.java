@@ -1,5 +1,6 @@
 package ru.study.shop.adapters.controllers;
 
+import org.apache.commons.validator.GenericValidator;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -7,7 +8,9 @@ import ru.study.shop.entities.Order;
 import ru.study.shop.services.interfaces.OrderService;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -15,6 +18,8 @@ import java.util.stream.Collectors;
 @Controller
 @RequestMapping("/shop/orders")
 public class OrderController {
+    private static final Locale DATE_TIME_LOCALE = DateTimeFormatter.ISO_DATE_TIME.getLocale();
+
     private OrderService orderService;
 
     public OrderController(OrderService orderService) {
@@ -31,10 +36,10 @@ public class OrderController {
 
         if (Objects.isNull(strFromTime) && Objects.isNull(strToTime))
             return ResponseEntity.ok().body(orderService.findAll());
-        if(Objects.nonNull(strFromTime)) {
+        if (Objects.nonNull(strFromTime) && GenericValidator.isDate(strFromTime, DATE_TIME_LOCALE)) {
             dateTimeFrom = LocalDateTime.parse(strFromTime);
         }
-        if (Objects.nonNull(strToTime)) {
+        if (Objects.nonNull(strToTime) && GenericValidator.isDate(strToTime, DATE_TIME_LOCALE)) {
             dateTimeTo = LocalDateTime.parse(strToTime);
         }
 
@@ -48,9 +53,8 @@ public class OrderController {
 
     @GetMapping(value = "/{id}", produces = "application/json")
     public ResponseEntity<Order> getOrderById(@PathVariable("id") Long orderId) {
-        Optional<Order> order = orderService.findById(orderId);
-        return order
-            .map(value -> ResponseEntity.ok().body(value))
+        return orderService.findById(orderId)
+            .map(ResponseEntity::ok)
             .orElseGet(() -> ResponseEntity.badRequest().body(null));
     }
 }

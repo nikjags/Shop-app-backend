@@ -31,19 +31,29 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findById(orderId);
     }
 
-    @Override
-    public List<Order> findAllFromDate(LocalDateTime fromDate) {
-        return orderRepository.findAll()
-            .stream()
-            .filter(order -> order.getOrderedTime().isAfter(fromDate))
-            .collect(Collectors.toList());
-    }
-
+    /** TODO
+     *  Объединить методы findAllFromDate и findAllToDate
+     *  для единой фильтрации и валидации по дате.
+     *  Валидация будет производиться через GenericValidator и локаль DateTimeFormatter.ISO_DATE_TIME.
+     *  Если дата невалидна, то не принимать её в расчёт при фильтрации.
+     *
+     *  После создания единого метода -- убрать проверку валидации из контроллеров.
+     *
+     *  P.S. не забыть про TDD.
+     */
     @Override
     public List<Order> findAllToDate(LocalDateTime toDate) {
         return orderRepository.findAll()
             .stream()
             .filter(order -> order.getOrderedTime().isBefore(toDate))
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Order> findAllFromDate(LocalDateTime fromDate) {
+        return orderRepository.findAll()
+            .stream()
+            .filter(order -> order.getOrderedTime().isAfter(fromDate))
             .collect(Collectors.toList());
     }
 

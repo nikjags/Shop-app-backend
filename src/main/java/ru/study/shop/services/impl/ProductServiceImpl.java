@@ -62,7 +62,6 @@ public class ProductServiceImpl implements ProductService {
 
         Long finalFromPrice = fromPrice;
         Long finalToPrice = toPrice;
-
         return productRepository.findAll().stream()
             .filter(product ->
                 product.getPrice().compareTo(finalFromPrice) >= 0 &&

@@ -3,13 +3,16 @@ package ru.study.shop.adapters.controllers;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import ru.study.shop.entities.Stock;
 import ru.study.shop.services.interfaces.StockService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Controller
@@ -48,9 +51,20 @@ public class StockController {
                     .collect(Collectors.toList()));
         }
 
-        return ResponseEntity.ok(
-            stockService.findAll().stream()
-                .filter(stock -> stock.getSize().equals(size) && stock.getProduct().getId().equals(productId))
-                .collect(Collectors.toList()));
+        List<Stock> stockList = new ArrayList<>();
+
+        Optional<Stock> stock = stockService.findByProductIdAndSize(productId, size);
+        stock.ifPresent(stockList::add);
+        return ResponseEntity.ok(stockList);
+    }
+
+    @GetMapping("/{productId}/{size}")
+    public ResponseEntity<Stock> findByProductIdAndSize(
+        @PathVariable("productId") Long productId,
+        @PathVariable("size") String size) {
+
+        return stockService.findByProductIdAndSize(productId, size)
+            .map(ResponseEntity::ok)
+            .orElseGet(() -> ResponseEntity.badRequest().body(null));
     }
 }

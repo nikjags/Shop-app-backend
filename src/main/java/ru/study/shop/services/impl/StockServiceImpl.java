@@ -7,6 +7,7 @@ import ru.study.shop.entities.Stock;
 import ru.study.shop.services.interfaces.StockService;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -55,5 +56,10 @@ public class StockServiceImpl implements StockService {
     @Override
     public List<Stock> findAll() {
         return stockRepository.findAll();
+    }
+
+    @Override
+    public Optional<Stock> findByProductIdAndSize(Long productId, String size) {
+        return stockRepository.findByProductIdAndSize(productId, size);
     }
 }

@@ -31,7 +31,7 @@ public class OrderServiceImpl implements OrderService {
         return orderRepository.findById(orderId);
     }
 
-    /** TODO
+    /* TODO
      *  Объединить методы findAllFromDate и findAllToDate
      *  для единой фильтрации и валидации по дате.
      *  Валидация будет производиться через GenericValidator и локаль DateTimeFormatter.ISO_DATE_TIME.
@@ -40,6 +40,14 @@ public class OrderServiceImpl implements OrderService {
      *  После создания единого метода -- убрать проверку валидации из контроллеров.
      *
      *  P.S. не забыть про TDD.
+     */
+
+    /* TODO 2
+     *  Сделать для каждого класса-сущности уникальный класс-фильтр с возможностью задавать условия фильтрации
+     *  в виде цепочки методов, оканчивающихся методом, возвращающим список подходящих под условия объектов.
+     *
+     *  Возможно, данный класс должен реализовывать интерфейс сервиса, а в себе содержать текущий сервис
+     *  в качестве одного из полей (расширение через композицию).
      */
     @Override
     public List<Order> findAllToDate(LocalDateTime toDate) {

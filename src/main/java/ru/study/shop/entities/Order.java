@@ -1,6 +1,6 @@
 package ru.study.shop.entities;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -9,13 +9,18 @@ import java.util.List;
 
 @Entity
 @Table(name = "orders")
+@JsonPropertyOrder({"orderId", "customerId", "products", "orderedTime", "delivered"})
 public class Order {
     @Id
-    @GeneratedValue(strategy =  GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @JsonProperty("orderId")
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "customer_id")
+    @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+    @JsonIdentityReference(alwaysAsId = true)
+    @JsonProperty("customerId")
     private Customer customer;
 
     @ManyToMany
@@ -24,7 +29,7 @@ public class Order {
         joinColumns = @JoinColumn(name = "order_id"),
         inverseJoinColumns = @JoinColumn(name = "product_id")
     )
-    @JsonProperty(value = "Products")
+    @JsonProperty(value = "products")
     private List<Product> productList = new ArrayList<>();
 
     private LocalDateTime orderedTime;

@@ -23,6 +23,9 @@ public class Product implements Serializable {
     private String description;
     private Long price;
 
+    public Product() {
+    }
+
     public Product(
         String productName,
         String productType,
@@ -36,9 +39,6 @@ public class Product implements Serializable {
         this.manufacturer = manufacturer;
         this.description = description;
         this.price = price;
-    }
-
-    public Product() {
     }
 
     public Long getId() {

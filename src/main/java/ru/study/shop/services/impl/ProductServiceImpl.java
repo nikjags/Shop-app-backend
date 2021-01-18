@@ -8,6 +8,7 @@ import ru.study.shop.services.interfaces.ProductService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -15,13 +16,18 @@ public class ProductServiceImpl implements ProductService {
 
     private ProductRepository productRepository;
 
-    public ProductServiceImpl (ProductRepository productRepository) {
+    public ProductServiceImpl(ProductRepository productRepository) {
         this.productRepository = productRepository;
     }
 
     @Override
     public List<Product> findAll() {
         return productRepository.findAll();
+    }
+
+    @Override
+    public Optional<Product> findById(Long id) {
+        return productRepository.findById(id);
     }
 
     @Override
@@ -54,9 +60,12 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<Product> findFromPriceToPrice(Long fromPrice, Long toPrice) {
-        if (Objects.isNull(fromPrice) & Objects.isNull(toPrice))
+        if (Objects.isNull(fromPrice) && Objects.isNull(toPrice)) {
             return new ArrayList<>();
-        if (Objects.isNull(fromPrice)) fromPrice = 0L;
+        }
+        if (Objects.isNull(fromPrice)) {
+            fromPrice = 0L;
+        }
         if (Objects.isNull(toPrice)) toPrice = Long.MAX_VALUE;
         if (fromPrice.compareTo(toPrice) > 0 ) return new ArrayList<>();
 

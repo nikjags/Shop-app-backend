@@ -6,21 +6,8 @@ import javax.persistence.*;
 @Table(name = "STOCK")
 @IdClass(StockId.class)
 public class Stock {
-    /* TODO
-     *
-     * FethType.EAGER для соединения с Product не очень круто, хочется LAZY,
-     * но при попытке получить объекты Stock через репозиторий выскакивает ошибка при попытке
-     * сериализовать хайбернейтовский прокси-класс для Product.
-     * Разобраться.
-     *
-     * Существует вероятность, что это происходит из-за составного ключа.
-     * Так как StockId -- сериализуемый класс, то начинаются проблемесы.
-     *
-     * Можно, конечно, отказаться от составного ключа и использовать суррогатный...
-     *
-     */
     @Id
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;
 

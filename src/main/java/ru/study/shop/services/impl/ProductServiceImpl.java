@@ -2,6 +2,7 @@ package ru.study.shop.services.impl;
 
 import org.springframework.stereotype.Service;
 import ru.study.shop.adapters.hibernate.ProductRepository;
+import ru.study.shop.adapters.hibernate.impl.query_classes.ProductQuery;
 import ru.study.shop.entities.Product;
 import ru.study.shop.services.interfaces.ProductService;
 
@@ -76,6 +77,11 @@ public class ProductServiceImpl implements ProductService {
                 product.getPrice().compareTo(finalFromPrice) >= 0 &&
                     product.getPrice().compareTo(finalToPrice) <= 0)
             .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Product> findByProductQuery(ProductQuery productQuery) {
+        return productRepository.findByProductQuery(productQuery);
     }
 
     @Override

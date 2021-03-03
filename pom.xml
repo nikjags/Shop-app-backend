@@ -15,11 +15,13 @@
 	<description>pet-project of shop website</description>
 
 	<properties>
-		<java.version>8</java.version>
-		<org.flyway.version>7.3.0</org.flyway.version>
-		<unitils-mock.version>3.4.6</unitils-mock.version>
-		<jackson-databind.version>2.11.4</jackson-databind.version>
 		<commons-validator.version>1.7</commons-validator.version>
+		<jackson-databind.version>2.11.4</jackson-databind.version>
+		<java.version>8</java.version>
+		<org.apache.commons-math3.version>3.6.1</org.apache.commons-math3.version>
+		<org.flyway.version>7.3.0</org.flyway.version>
+		<org.lombok.version>1.18.16</org.lombok.version>
+		<unitils-mock.version>3.4.6</unitils-mock.version>
 	</properties>
 
 	<dependencies>
@@ -35,13 +37,11 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-maven-plugin</artifactId>
 			<version>${org.flyway.version}</version>
-			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -65,11 +65,22 @@
 			<version>${jackson-databind.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math3</artifactId>
+			<version>${org.apache.commons-math3.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>commons-validator</groupId>
 			<artifactId>commons-validator</artifactId>
 			<version>${commons-validator.version}</version>
 		</dependency>
-    </dependencies>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>${org.lombok.version}</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
 
 
 	<build>

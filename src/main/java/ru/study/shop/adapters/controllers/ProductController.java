@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.study.shop.adapters.hibernate.impl.query_classes.ProductQuery;
-import ru.study.shop.adapters.hibernate.impl.query_classes.ProductQuery.Builder;
+import ru.study.shop.adapters.hibernate.impl.query_classes.ProductQueryConstraints;
+import ru.study.shop.adapters.hibernate.impl.query_classes.ProductQueryConstraints.Builder;
 import ru.study.shop.entities.Product;
 import ru.study.shop.services.interfaces.ProductService;
 
@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Controller
-@RequestMapping("/shop/products")
+@RequestMapping("/products")
 public class ProductController {
 
     private ProductService productService;
@@ -35,7 +35,7 @@ public class ProductController {
         @RequestParam(name = "materials") Optional<List<String>> productMaterials,
         @RequestParam(name = "fromPrice") Optional<String> strFromPrice,
         @RequestParam(name = "toPrice") Optional<String> strToPrice) {
-        Builder productQuery = ProductQuery.startQuery();
+        Builder builder = ProductQueryConstraints.getConstraintsBuilder();
 
         Long fromId = null;
         Long toId = null;
@@ -45,16 +45,15 @@ public class ProductController {
         if (strToId.isPresent() && GenericValidator.isLong(strToId.get())) {
             toId = Long.valueOf(strToId.get());
         }
+        builder.idConstraint(fromId, toId);
 
-        productQuery.idRange(fromId, toId);
+        productNames.ifPresent(builder::nameConstraint);
 
-        productNames.ifPresent(productQuery::inNameList);
+        productTypes.ifPresent(builder::typeConstraint);
 
-        productTypes.ifPresent(productQuery::inTypeList);
+        productManufacturers.ifPresent(builder::manufacturerConstraint);
 
-        productManufacturers.ifPresent(productQuery::inManufacturerList);
-
-        productMaterials.ifPresent(productQuery::inMaterialList);
+        productMaterials.ifPresent(builder::materialConstraint);
 
         Long fromPrice = null;
         Long toPrice = null;
@@ -64,12 +63,11 @@ public class ProductController {
         if (strToPrice.isPresent() && GenericValidator.isLong(strToPrice.get())) {
             toPrice = Long.valueOf(strToPrice.get());
         }
-        productQuery.priceRange(fromPrice, toPrice);
+        builder.priceConstraint(fromPrice, toPrice);
 
-        ProductQuery builtQuery = productQuery.build();
+        ProductQueryConstraints builtQuery = builder.build();
 
-        return ResponseEntity.ok(
-            productService.findByProductQuery(builtQuery));
+        return ResponseEntity.ok(productService.findByProductQuery(builtQuery));
     }
 
     @GetMapping(value = "/{id}", produces = "application/json")

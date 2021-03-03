@@ -2,7 +2,8 @@ package ru.study.shop.adapters.hibernate.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.study.shop.adapters.hibernate.CustomProductRepository;
-import ru.study.shop.adapters.hibernate.impl.query_classes.ProductQuery;
+import ru.study.shop.adapters.hibernate.impl.query_classes.ProductQueryConstraints;
+import ru.study.shop.adapters.hibernate.impl.query_classes.constraint_classes.Constraint;
 import ru.study.shop.entities.Product;
 
 import javax.persistence.EntityManager;
@@ -15,11 +16,13 @@ import javax.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CustomProductRepositoryImpl implements CustomProductRepository {
+import static java.util.Objects.isNull;
+import static ru.study.shop.adapters.hibernate.impl.query_classes.constraint_classes.ConstraintType.RANGE;
 
+public class CustomProductRepositoryImpl implements CustomProductRepository {
     private static final String ID_COLUMN = "id";
-    private static final String PRODUCT_NAME_COLUMN = "productName";
-    private static final String PRODUCT_TYPE_COLUMN = "productType";
+    private static final String NAME_COLUMN = "productName";
+    private static final String TYPE_COLUMN = "productType";
     private static final String MANUFACTURER_COLUMN = "manufacturer";
     private static final String MATERIAL_COLUMN = "material";
     private static final String PRICE_COLUMN = "price";
@@ -29,35 +32,48 @@ public class CustomProductRepositoryImpl implements CustomProductRepository {
     private EntityManager entityManager;
 
     @Override
-    public List<Product> findByProductQuery(ProductQuery productQuery) {
+    public List<Product> findByProductQueryConstraints(ProductQueryConstraints productQueryConstraints) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Product> query = cb.createQuery(Product.class);
         Root<Product> root = query.from(Product.class);
 
+        if (isNull(productQueryConstraints)) {
+            query.select(root);
+            return entityManager.createQuery(query).getResultList();
+        }
+
         List<Predicate> predicates = new ArrayList<>();
 
-        if (productQuery.getLowerIdBound().isPresent() || productQuery.getUpperIdBound().isPresent()) {
-            predicates.add(getIdRangePredicate(cb, root, productQuery));
+        if (productQueryConstraints.isIdIsConstrained()) {
+            if (productQueryConstraints.getIdConstraint().getConstraintType() == RANGE) {
+                predicates.add(getRangePredicate(cb, root, ID_COLUMN, productQueryConstraints.getIdConstraint()));
+            } else {
+                predicates.add(getInListPredicate(cb, root, productQueryConstraints.getIdConstraint().getConstraintList(), ID_COLUMN));
+            }
         }
 
-        if (!productQuery.getProductNameList().isEmpty()) {
-            predicates.add(getInListPredicate(cb, root, productQuery.getProductNameList(), PRODUCT_NAME_COLUMN));
+        if (productQueryConstraints.isNameIsConstrained()) {
+            predicates.add(getInListPredicate(cb, root, productQueryConstraints.getNameConstraint().getConstraintList(), NAME_COLUMN));
         }
 
-        if (!productQuery.getProductTypeList().isEmpty()) {
-            predicates.add(getInListPredicate(cb, root, productQuery.getProductTypeList(), PRODUCT_TYPE_COLUMN));
+        if (productQueryConstraints.isTypeIsConstrained()) {
+            predicates.add(getInListPredicate(cb, root, productQueryConstraints.getTypeConstraint().getConstraintList(), TYPE_COLUMN));
         }
 
-        if (!productQuery.getProductManufacturerList().isEmpty()) {
-            predicates.add(getInListPredicate(cb, root, productQuery.getProductManufacturerList(), MANUFACTURER_COLUMN));
+        if (productQueryConstraints.isManufacturerIsConstrained()) {
+            predicates.add(getInListPredicate(cb, root, productQueryConstraints.getManufacturerConstraint().getConstraintList(), MANUFACTURER_COLUMN));
         }
 
-        if (!productQuery.getProductMaterialList().isEmpty()) {
-            predicates.add(getInListPredicate(cb, root, productQuery.getProductMaterialList(), MATERIAL_COLUMN));
+        if (productQueryConstraints.isMaterialIsConstrained()) {
+            predicates.add(getInListPredicate(cb, root, productQueryConstraints.getMaterialConstraint().getConstraintList(), MATERIAL_COLUMN));
         }
 
-        if (productQuery.getLowerPriceBound().isPresent() || productQuery.getUpperPriceBound().isPresent()) {
-            predicates.add(getPriceRangePredicate(cb, root, productQuery));
+        if (productQueryConstraints.isPriceIsConstrained()) {
+            if (productQueryConstraints.getPriceConstraint().getConstraintType() == RANGE) {
+                predicates.add(getRangePredicate(cb, root, PRICE_COLUMN, productQueryConstraints.getPriceConstraint()));
+            } else {
+                predicates.add(getInListPredicate(cb, root, productQueryConstraints.getPriceConstraint().getConstraintList(), PRICE_COLUMN));
+            }
         }
 
         query.select(root).where(cb.and(predicates.toArray(new Predicate[0])));
@@ -68,40 +84,16 @@ public class CustomProductRepositoryImpl implements CustomProductRepository {
     // Impl
     /////////////////////////////////////////////////////////////
 
-    private Predicate getIdRangePredicate(CriteriaBuilder cb, Root<Product> root, ProductQuery productQuery) {
-        Long lowerIdBound = ProductQuery.MIN_ID;
-        Long upperIdBound = ProductQuery.MAX_ID;
-        if (productQuery.getLowerIdBound().isPresent()) {
-            lowerIdBound = productQuery.getLowerIdBound().get();
-        }
-        if (productQuery.getUpperIdBound().isPresent()) {
-            upperIdBound = productQuery.getUpperIdBound().get();
-        }
-
-        return cb.between(root.get(ID_COLUMN),
-            lowerIdBound,
-            upperIdBound);
+    private <E extends Comparable<E>> Predicate getRangePredicate(CriteriaBuilder cb, Root<Product> root, String columnName, Constraint<E> constraint) {
+        return cb.between(root.get(columnName),
+            constraint.getFrom(),
+            constraint.getTo());
     }
 
-    private Predicate getInListPredicate(CriteriaBuilder cb, Root<Product> root, List<String> valuesList, String entityFieldName) {
-        In<String> inListClause = cb.in(root.get(entityFieldName));
+    private <T> Predicate getInListPredicate(CriteriaBuilder cb, Root<Product> root, List<T> valuesList, String entityFieldName) {
+        In<T> inListClause = cb.in(root.get(entityFieldName));
 
         valuesList.forEach(inListClause::value);
         return inListClause;
-    }
-
-    private Predicate getPriceRangePredicate(CriteriaBuilder cb, Root<Product> root, ProductQuery productQuery) {
-        Long lowerPriceBound = ProductQuery.MIN_PRICE;
-        Long upperPriceBound = ProductQuery.MAX_PRICE;
-        if (productQuery.getLowerPriceBound().isPresent()) {
-            lowerPriceBound = productQuery.getLowerPriceBound().get();
-        }
-        if (productQuery.getUpperPriceBound().isPresent()) {
-            upperPriceBound = productQuery.getUpperPriceBound().get();
-        }
-
-        return cb.between(root.get(PRICE_COLUMN),
-            lowerPriceBound,
-            upperPriceBound);
     }
 }

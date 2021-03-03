@@ -2,7 +2,7 @@ package ru.study.shop.services.impl;
 
 import org.springframework.stereotype.Service;
 import ru.study.shop.adapters.hibernate.ProductRepository;
-import ru.study.shop.adapters.hibernate.impl.query_classes.ProductQuery;
+import ru.study.shop.adapters.hibernate.impl.query_classes.ProductQueryConstraints;
 import ru.study.shop.entities.Product;
 import ru.study.shop.services.interfaces.ProductService;
 
@@ -80,8 +80,8 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<Product> findByProductQuery(ProductQuery productQuery) {
-        return productRepository.findByProductQuery(productQuery);
+    public List<Product> findByProductQuery(ProductQueryConstraints productQueryConstraints) {
+        return productRepository.findByProductQueryConstraints(productQueryConstraints);
     }
 
     @Override

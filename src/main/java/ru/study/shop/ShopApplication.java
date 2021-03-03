@@ -11,7 +11,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @EntityScan(basePackages = "ru.study.shop.entities")
 @EnableJpaRepositories(basePackages = "ru.study.shop.adapters.hibernate")
 public class ShopApplication {
-
 	public static void main(String[] args) {
 		SpringApplication.run(ShopApplication.class, args);
 	}

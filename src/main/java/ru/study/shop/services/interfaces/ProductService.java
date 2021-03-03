@@ -1,7 +1,7 @@
 
 package ru.study.shop.services.interfaces;
 
-import ru.study.shop.adapters.hibernate.impl.query_classes.ProductQuery;
+import ru.study.shop.adapters.hibernate.impl.query_classes.ProductQueryConstraints;
 import ru.study.shop.entities.Product;
 
 import java.util.List;
@@ -22,7 +22,7 @@ public interface ProductService {
 
     List<Product> findFromPriceToPrice(Long fromPrice, Long toPrice);
 
-    List<Product> findByProductQuery(ProductQuery productQuery);
+    List<Product> findByProductQuery(ProductQueryConstraints productQueryConstraints);
 
     Product saveProduct(Product product);
 

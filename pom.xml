@@ -19,6 +19,7 @@
 		<org.flyway.version>7.3.0</org.flyway.version>
 		<unitils-mock.version>3.4.6</unitils-mock.version>
 		<jackson-databind.version>2.11.4</jackson-databind.version>
+		<org.lombok.version>1.18.16</org.lombok.version>
 		<commons-validator.version>1.7</commons-validator.version>
 	</properties>
 
@@ -69,7 +70,13 @@
 			<artifactId>commons-validator</artifactId>
 			<version>${commons-validator.version}</version>
 		</dependency>
-    </dependencies>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>${org.lombok.version}</version>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
 
 
 	<build>

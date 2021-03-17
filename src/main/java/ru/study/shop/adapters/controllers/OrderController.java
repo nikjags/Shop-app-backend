@@ -3,7 +3,10 @@ package ru.study.shop.adapters.controllers;
 import org.apache.commons.validator.GenericValidator;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import ru.study.shop.entities.Order;
 import ru.study.shop.services.interfaces.OrderService;
 
@@ -12,11 +15,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Controller
-@RequestMapping("/shop/orders")
+@RequestMapping("/orders")
 public class OrderController {
     private static final Locale DATE_TIME_LOCALE = DateTimeFormatter.ISO_DATE_TIME.getLocale();
 

@@ -16,7 +16,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Controller
-@RequestMapping("/shop/stocks")
+@RequestMapping("/stocks")
 public class StockController {
 
     private StockService stockService;

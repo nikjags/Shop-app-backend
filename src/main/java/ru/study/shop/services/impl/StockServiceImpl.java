@@ -13,10 +13,15 @@ import java.util.stream.Collectors;
 @Service
 public class StockServiceImpl implements StockService {
 
-    private StockRepository stockRepository;
+    private final StockRepository stockRepository;
 
     public StockServiceImpl(StockRepository stockRepository) {
         this.stockRepository = stockRepository;
+    }
+
+    @Override
+    public List<Stock> findAll() {
+        return stockRepository.findAll();
     }
 
     @Override
@@ -51,11 +56,6 @@ public class StockServiceImpl implements StockService {
     @Override
     public void deleteStock(Stock stock) {
         stockRepository.delete(stock);
-    }
-
-    @Override
-    public List<Stock> findAll() {
-        return stockRepository.findAll();
     }
 
     @Override

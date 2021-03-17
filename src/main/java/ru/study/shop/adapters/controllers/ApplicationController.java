@@ -7,11 +7,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/shop/app")
+@RequestMapping("/app")
 public class ApplicationController {
 
     private static final int DEFAULT_SHUTDOWN_CODE = 0;
-    private ApplicationContext applicationContext;
+    private final ApplicationContext applicationContext;
 
     public ApplicationController(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;

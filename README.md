@@ -29,7 +29,18 @@ shop-app-backend — мой pet-project, представляющий собой
 
 Репозиторий с образом приложения: `nikjag/shop-app-backend`. 
 
-Чтобы создать контейнер: `docker run -dp 8080:8080 --name shop-app-backend nikjag/shop-app-backend`.
+Чтобы создать контейнер: 
+
+```docker
+docker run -dp 8080:8080 --name shop-app-backend nikjag/shop-app-backend:version-*версия*
+```
+`*версия*` -- какая-либо версия проекта.
+
+Например, для версии `1.2.0`:
+
+```docker
+docker run -dp 8080:8080 --name shop-app-backend nikjag/shop-app-backend:version-1.2.0
+```
 
 ## Архив
 

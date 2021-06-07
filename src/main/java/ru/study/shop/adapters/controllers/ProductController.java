@@ -2,11 +2,7 @@ package ru.study.shop.adapters.controllers;
 
 import org.apache.commons.validator.GenericValidator;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import ru.study.shop.adapters.hibernate.impl.query_classes.ProductQueryConstraints;
 import ru.study.shop.adapters.hibernate.impl.query_classes.ProductQueryConstraints.Builder;
 import ru.study.shop.entities.Product;
@@ -15,7 +11,7 @@ import ru.study.shop.services.interfaces.ProductService;
 import java.util.List;
 import java.util.Optional;
 
-@Controller
+@RestController
 @RequestMapping("/products")
 public class ProductController {
 
@@ -76,5 +72,4 @@ public class ProductController {
             .map(ResponseEntity::ok)
             .orElseGet(() -> ResponseEntity.badRequest().body(null));
     }
-
 }

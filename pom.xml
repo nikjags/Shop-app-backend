@@ -14,6 +14,7 @@
 	<description>pet-project of shop website</description>
 
 	<properties>
+		<springdoc-openapi-ui.version>1.5.2</springdoc-openapi-ui.version>
 		<commons-validator.version>1.7</commons-validator.version>
 		<jackson-databind.version>2.11.4</jackson-databind.version>
 		<java.version>8</java.version>
@@ -32,6 +33,16 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-ui</artifactId>
+			<version>${springdoc-openapi-ui.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>com.h2database</groupId>
@@ -41,11 +52,6 @@
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-maven-plugin</artifactId>
 			<version>${org.flyway.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
 		</dependency>
         <dependency>
             <groupId>junit</groupId>

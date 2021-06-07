@@ -90,7 +90,17 @@ Backend-часть представляет собой небольшое при
 В данный момент предоставляемый API не является RESTful, по сути своей является RPC
 (подробности [здесь](https://roy.gbiv.com/untangled/2008/rest-apis-must-be-hypertext-driven)).
 
-Код контроллеров расположен в `src/main/java/ru/study/shop/adapters/controllers`.
+API контроллеров можно посмотреть через Swagger при запуске приложения:
+
+```
+localhost:8080/shop/api/swagger-ui.html
+```
+
+Можно также получить JSON с OpenAPI v3 схемой:
+
+```
+localhost:8080/shop/api/v3/api-docs/
+```
 
 ## Схема базы данных
 

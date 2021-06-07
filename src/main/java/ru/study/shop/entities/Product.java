@@ -1,7 +1,6 @@
 package ru.study.shop.entities;
 
 import lombok.Data;
-import org.hibernate.annotations.NaturalId;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -13,15 +12,11 @@ public class Product implements Serializable {
     private static final long serialVersionUID = 878054394L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NaturalId
     private String productName;
-
-    @NaturalId
     private String productType;
-
     private String material;
     private String manufacturer;
     private String description;

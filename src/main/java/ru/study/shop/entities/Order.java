@@ -25,7 +25,7 @@ public class Order {
     @JsonProperty("customerId")
     private Customer customer;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(
         name = "orders_product",
         joinColumns = @JoinColumn(name = "order_id"),

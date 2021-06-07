@@ -39,6 +39,6 @@ ALTER TABLE orders ADD FOREIGN KEY (customer_id) REFERENCES customer (id);
 
 ALTER TABLE orders_product ADD FOREIGN KEY (order_id) REFERENCES orders (id);
 
-ALTER TABLE orders_product ADD FOREIGN KEY (product_id) REFERENCES product (id);
+ALTER TABLE orders_product ADD FOREIGN KEY (product_id) REFERENCES product (id) ON DELETE CASCADE;
 
-ALTER TABLE stock ADD FOREIGN KEY (product_id) REFERENCES product (id);
+ALTER TABLE stock ADD FOREIGN KEY (product_id) REFERENCES product (id) ON DELETE CASCADE;

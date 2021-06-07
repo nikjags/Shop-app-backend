@@ -1,4 +1,3 @@
-
 package ru.study.shop.services.interfaces;
 
 import ru.study.shop.adapters.hibernate.impl.query_classes.ProductQueryConstraints;
@@ -27,6 +26,8 @@ public interface ProductService {
     Product saveProduct(Product product);
 
     List<Product> saveAll(List<Product> products);
+
+    void deleteById(Long id);
 
     void deleteProduct(Product product);
 

@@ -67,8 +67,12 @@ public class ProductServiceImpl implements ProductService {
         if (Objects.isNull(fromPrice)) {
             fromPrice = 0L;
         }
-        if (Objects.isNull(toPrice)) toPrice = Long.MAX_VALUE;
-        if (fromPrice.compareTo(toPrice) > 0 ) return new ArrayList<>();
+        if (Objects.isNull(toPrice)) {
+            toPrice = Long.MAX_VALUE;
+        }
+        if (fromPrice.compareTo(toPrice) > 0) {
+            return new ArrayList<>();
+        }
 
         Long finalFromPrice = fromPrice;
         Long finalToPrice = toPrice;
@@ -85,8 +89,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public void deleteById(Long id) {
+        productRepository.deleteById(id);
+    }
+
+    @Override
     public Product saveProduct(Product product) {
-        return null;
+        return productRepository.save(product);
     }
 
     @Override

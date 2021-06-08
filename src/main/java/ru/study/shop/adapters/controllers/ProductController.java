@@ -15,13 +15,16 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+
+import static java.util.Objects.nonNull;
 
 @RestController
 @RequestMapping("/products")
 public class ProductController {
+    private static final String NO_SUCH_PRODUCT_MESSAGE = "no product with such ID is present";
+    private static final String INVALID_ID_MESSAGE = "invalid ID; must be more than 0";
 
     private final ProductService productService;
 
@@ -81,7 +84,7 @@ public class ProductController {
     public ResponseEntity<Product> getProductById(@PathVariable("id") Long productId) {
         return productService.findById(productId)
             .map(ResponseEntity::ok)
-            .orElseGet(() -> ResponseEntity.badRequest().body(null));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, NO_SUCH_PRODUCT_MESSAGE));
     }
 
     @PostMapping(value = "/new")
@@ -93,24 +96,24 @@ public class ProductController {
 
     @PutMapping(value = "/{id}")
     public ResponseEntity<Product> editProduct(@PathVariable("id") Long productId, @RequestBody ProductDto productChanges) {
-        validateId(productId);
+        validateProductId(productId);
 
-        Optional<Product> productOptional = productService.findById(productId);
-        if (!productOptional.isPresent()) {
-            throw new ResponseStatusException(
-                HttpStatus.BAD_REQUEST, "no product with id = " + productId + " is present");
+        Product editableProduct = checkForProductPresenceAngGet(productId);
+
+        boolean isEdited = updateProduct(editableProduct, productChanges);
+
+        if (isEdited) {
+            productService.saveProduct(editableProduct);
         }
-
-        Product editableProduct = productOptional.get();
-        updateProduct(editableProduct, productChanges);
-        return ResponseEntity.ok(productService.saveProduct(editableProduct));
+        return ResponseEntity.ok(editableProduct);
     }
 
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<Product> deleteProduct(@PathVariable("id") Long productId) {
-        validateId(productId);
+        validateProductId(productId);
 
-        productService.deleteById(productId);
+        Product deletableProduct = checkForProductPresenceAngGet(productId);
+        productService.deleteProduct(deletableProduct);
 
         return ResponseEntity.accepted().build();
     }
@@ -119,32 +122,68 @@ public class ProductController {
     // = Implementation
     // ===================================================================================================================
 
-    private void validateId(Long productId) {
+    private Product checkForProductPresenceAngGet(Long productId) {
+        Optional<Product> productOptional = productService.findById(productId);
+        if (!productOptional.isPresent()) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST, NO_SUCH_PRODUCT_MESSAGE);
+        }
+        return productOptional.get();
+    }
+
+    private void validateProductId(Long productId) {
         if (productId < 1) {
             throw new ResponseStatusException(
-                HttpStatus.BAD_REQUEST, "id path variable must be more than 0");
+                HttpStatus.BAD_REQUEST, INVALID_ID_MESSAGE
+            );
         }
     }
 
-    private void updateProduct(Product editableProduct, ProductDto productChanges) {
-        if (Objects.nonNull(productChanges.getProductName())) {
+    private boolean updateProduct(Product editableProduct, ProductDto productChanges) {
+        boolean isChanged = false;
+
+        if (nonNull(productChanges.getProductName())
+            && validateDtoProperty(productChanges, "productName")) {
+
             editableProduct.setProductName(productChanges.getProductName());
+            isChanged = true;
         }
-        if (Objects.nonNull(productChanges.getProductType())) {
+        if (nonNull(productChanges.getProductType())
+            && validateDtoProperty(productChanges, "productType")) {
+
             editableProduct.setProductType(productChanges.getProductType());
+            isChanged = true;
         }
-        if (Objects.nonNull(productChanges.getMaterial())) {
+        if (nonNull(productChanges.getMaterial())
+            && validateDtoProperty(productChanges, "material")) {
+
             editableProduct.setMaterial(productChanges.getMaterial());
+            isChanged = true;
         }
-        if (Objects.nonNull(productChanges.getManufacturer())) {
+        if (nonNull(productChanges.getManufacturer())
+            && validateDtoProperty(productChanges, "manufacturer")) {
+
             editableProduct.setManufacturer(productChanges.getManufacturer());
+            isChanged = true;
         }
-        if (Objects.nonNull(productChanges.getDescription())) {
+        if (nonNull(productChanges.getDescription())
+            && validateDtoProperty(productChanges, "description")) {
+
             editableProduct.setDescription(productChanges.getDescription());
+            isChanged = true;
         }
-        if (Objects.nonNull(productChanges.getPrice())) {
+        if (nonNull(productChanges.getPrice())
+            && validateDtoProperty(productChanges, "price")) {
+
             editableProduct.setPrice(productChanges.getPrice());
+            isChanged = true;
         }
+
+        return isChanged;
+    }
+
+    private boolean validateDtoProperty(ProductDto productChanges, String propertyName) {
+        return validator.validateProperty(productChanges, propertyName).isEmpty();
     }
 
     private void validateProductDto(ProductDto newProduct) {

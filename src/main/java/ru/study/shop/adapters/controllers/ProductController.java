@@ -25,6 +25,7 @@ import static java.util.Objects.nonNull;
 public class ProductController {
     private static final String NO_SUCH_PRODUCT_MESSAGE = "no product with such ID is present";
     private static final String INVALID_ID_MESSAGE = "invalid ID; must be more than 0";
+    private static final String NO_PROPERTIES_TO_UPDATE_MESSAGE = "no properties to update in request body";
 
     private final ProductService productService;
 
@@ -82,6 +83,8 @@ public class ProductController {
 
     @GetMapping(value = "/{id}", produces = "application/json")
     public ResponseEntity<Product> getProductById(@PathVariable("id") Long productId) {
+        validateProductId(productId);
+
         return productService.findById(productId)
             .map(ResponseEntity::ok)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, NO_SUCH_PRODUCT_MESSAGE));
@@ -100,11 +103,9 @@ public class ProductController {
 
         Product editableProduct = checkForProductPresenceAngGet(productId);
 
-        boolean isEdited = updateProduct(editableProduct, productChanges);
+        updateProduct(editableProduct, productChanges);
+        productService.saveProduct(editableProduct);
 
-        if (isEdited) {
-            productService.saveProduct(editableProduct);
-        }
         return ResponseEntity.ok(editableProduct);
     }
 
@@ -139,7 +140,7 @@ public class ProductController {
         }
     }
 
-    private boolean updateProduct(Product editableProduct, ProductDto productChanges) {
+    private void updateProduct(Product editableProduct, ProductDto productChanges) {
         boolean isChanged = false;
 
         if (nonNull(productChanges.getProductName())
@@ -179,7 +180,11 @@ public class ProductController {
             isChanged = true;
         }
 
-        return isChanged;
+        if (!isChanged) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST, NO_PROPERTIES_TO_UPDATE_MESSAGE
+            );
+        }
     }
 
     private boolean validateDtoProperty(ProductDto productChanges, String propertyName) {

@@ -14,7 +14,7 @@ import java.util.List;
 @JsonPropertyOrder({"orderId", "customerId", "products", "orderedTime", "delivered"})
 public class Order {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonProperty("orderId")
     private Long id;
 
@@ -25,7 +25,7 @@ public class Order {
     @JsonProperty("customerId")
     private Customer customer;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "orders_product",
         joinColumns = @JoinColumn(name = "order_id"),

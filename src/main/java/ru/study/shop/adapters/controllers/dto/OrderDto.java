@@ -3,12 +3,11 @@ package ru.study.shop.adapters.controllers.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.study.shop.entities.Product;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -19,7 +18,7 @@ public class OrderDto {
 
     @NotNull
     @Size(min = 1)
-    private List<Product> productList;
+    private Map<Long, Integer> productIdAmountMap;
 
     @NotNull
     private LocalDateTime orderedTime;

@@ -8,8 +8,10 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.study.shop.adapters.controllers.dto.OrderDto;
 import ru.study.shop.entities.Customer;
 import ru.study.shop.entities.Order;
+import ru.study.shop.entities.Product;
 import ru.study.shop.services.interfaces.CustomerService;
 import ru.study.shop.services.interfaces.OrderService;
+import ru.study.shop.services.interfaces.ProductService;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -17,6 +19,7 @@ import javax.validation.Validator;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
@@ -25,6 +28,7 @@ import static java.util.Objects.nonNull;
 @RequestMapping("/orders")
 public class OrderController {
     private static final Locale DATE_TIME_LOCALE = DateTimeFormatter.ISO_DATE_TIME.getLocale();
+    private static final String NO_SUCH_PRODUCT_MESSAGE = "no such product with  provided ID: ";
     private static final String NO_CUSTOMER_MESSAGE = "no such customer with provided ID";
     private static final String NO_SUCH_ORDER_MESSAGE = "no such order with provided ID";
     private static final String INVALID_ID_MESSAGE = "invalid ID; must be more than 0";
@@ -33,11 +37,14 @@ public class OrderController {
 
     private final CustomerService customerService;
 
+    private final ProductService productService;
+
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
-    public OrderController(OrderService orderService, CustomerService customerService) {
+    public OrderController(OrderService orderService, CustomerService customerService, ProductService productService) {
         this.orderService = orderService;
         this.customerService = customerService;
+        this.productService = productService;
     }
 
     @GetMapping(produces = "application/json")
@@ -116,16 +123,16 @@ public class OrderController {
     private boolean updateOrder(Order editableOrder, OrderDto orderDto) {
         boolean isChanged = false;
 
-        if (nonNull(orderDto.getProductList())
-            && validateDtoProperty(orderDto, "productList")) {
+        if (nonNull(orderDto.getProductIdAmountMap())
+            && validateDtoProperty(orderDto, "productIdAmountMap")) {
 
-            editableOrder.setProductList(orderDto.getProductList());
+            editableOrder.setProductList(dtoProductMapToList(orderDto.getProductIdAmountMap()));
             isChanged = true;
         }
         if (nonNull(orderDto.getOrderedTime())
             && validateDtoProperty(orderDto, "orderedTime")) {
 
-            editableOrder.setProductList(orderDto.getProductList());
+            editableOrder.setOrderedTime(orderDto.getOrderedTime());
             isChanged = true;
         }
         if (validateDtoProperty(orderDto, "delivered")) {
@@ -150,12 +157,37 @@ public class OrderController {
     }
 
     private Order mapDtoToOrder(OrderDto newOrderDto, Customer orderCustomer) {
-        return new Order(
-            orderCustomer,
-            newOrderDto.getProductList(),
+        return new Order(orderCustomer,
+            dtoProductMapToList(newOrderDto.getProductIdAmountMap()),
             newOrderDto.getOrderedTime(),
-            newOrderDto.isDelivered()
-        );
+            newOrderDto.isDelivered());
+    }
+
+    private List<Product> dtoProductMapToList(Map<Long, Integer> productIdAmount) {
+        List<Product> productList = new ArrayList<>();
+
+        for (Entry<Long, Integer> entry : productIdAmount.entrySet()) {
+            Long id = entry.getKey();
+            Integer amount = entry.getValue();
+            Optional<Product> optionalProduct = productService.findById(id);
+
+            if (!optionalProduct.isPresent()) {
+                throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, NO_SUCH_PRODUCT_MESSAGE + id
+                );
+            }
+            if (amount < 1) {
+                throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "invalid product amount for ID = " + id + "; must be more than 0"
+                );
+            }
+
+            for (int i = 0; i < entry.getValue(); i++) {
+                productList.add(optionalProduct.get());
+            }
+        }
+
+        return productList;
     }
 
     private void validateOrderDto(OrderDto newOrder) {

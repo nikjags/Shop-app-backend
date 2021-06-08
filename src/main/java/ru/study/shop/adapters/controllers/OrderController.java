@@ -32,6 +32,7 @@ public class OrderController {
     private static final String NO_CUSTOMER_MESSAGE = "no such customer with provided ID";
     private static final String NO_SUCH_ORDER_MESSAGE = "no such order with provided ID";
     private static final String INVALID_ID_MESSAGE = "invalid ID; must be more than 0";
+    private static final String NO_PROPERTIES_TO_UPDATE_MESSAGE = "no properties to update in request body";
 
     private final OrderService orderService;
 
@@ -75,6 +76,8 @@ public class OrderController {
 
     @GetMapping(value = "/{id}", produces = "application/json")
     public ResponseEntity<Order> getOrderById(@PathVariable("id") Long orderId) {
+        validateOrderId(orderId);
+
         return orderService.findById(orderId)
             .map(ResponseEntity::ok)
             .orElseGet(() -> ResponseEntity.badRequest().body(null));
@@ -97,11 +100,8 @@ public class OrderController {
 
         Order editableOrder = checkForPresenceAndGetOrder(orderId);
 
-        boolean isEdited = updateOrder(editableOrder, orderDto);
-
-        if (isEdited) {
-            orderService.saveOrder(editableOrder);
-        }
+        updateOrder(editableOrder, orderDto);
+        orderService.saveOrder(editableOrder);
 
         return ResponseEntity.ok(editableOrder);
     }
@@ -120,7 +120,7 @@ public class OrderController {
     // = Implementation
     // ===================================================================================================================
 
-    private boolean updateOrder(Order editableOrder, OrderDto orderDto) {
+    private void updateOrder(Order editableOrder, OrderDto orderDto) {
         boolean isChanged = false;
 
         if (nonNull(orderDto.getProductIdAmountMap())
@@ -141,7 +141,11 @@ public class OrderController {
             isChanged = true;
         }
 
-        return isChanged;
+        if (!isChanged) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST, NO_PROPERTIES_TO_UPDATE_MESSAGE
+            );
+        }
     }
 
     private boolean validateDtoProperty(OrderDto orderDto, String propertyName) {

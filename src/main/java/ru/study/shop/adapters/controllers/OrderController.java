@@ -106,7 +106,7 @@ public class OrderController {
         Order deletableOrder = checkForPresenceAndGetOrder(orderId);
         orderService.deleteOrder(deletableOrder);
 
-        return ResponseEntity.accepted().build();
+        return ResponseEntity.ok().build();
     }
 
     // ===================================================================================================================

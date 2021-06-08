@@ -115,7 +115,7 @@ public class ProductController {
         Product deletableProduct = checkForProductPresenceAngGet(productId);
         productService.deleteProduct(deletableProduct);
 
-        return ResponseEntity.accepted().build();
+        return ResponseEntity.ok().build();
     }
 
     // ===================================================================================================================

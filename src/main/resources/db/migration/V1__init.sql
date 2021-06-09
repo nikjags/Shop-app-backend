@@ -30,7 +30,7 @@ CREATE TABLE orders_product (
 
 CREATE TABLE stock (
   product_id int,
-  size varchar2(10) NOT NULL,
+  size varchar2(10),
   quantity int NOT NULL,
   PRIMARY KEY (product_id, size)
 );

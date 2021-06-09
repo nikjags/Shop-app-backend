@@ -15,6 +15,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -133,7 +134,7 @@ public class ProductController {
     }
 
     private void validateProductId(Long productId) {
-        if (productId < 1) {
+        if (Objects.isNull(productId) || productId < 1) {
             throw new ResponseStatusException(
                 HttpStatus.BAD_REQUEST, INVALID_ID_MESSAGE
             );
@@ -141,6 +142,12 @@ public class ProductController {
     }
 
     private void updateProduct(Product editableProduct, ProductDto productChanges) {
+        if (Objects.isNull(productChanges)) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST, NO_PROPERTIES_TO_UPDATE_MESSAGE
+            );
+        }
+
         boolean isChanged = false;
 
         if (nonNull(productChanges.getProductName())

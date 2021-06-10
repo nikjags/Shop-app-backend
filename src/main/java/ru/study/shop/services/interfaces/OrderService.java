@@ -17,6 +17,8 @@ public interface OrderService {
 
     List<Order> findAllToDate(LocalDateTime toDate);
 
+    List<Order> findAllFromToDate(LocalDateTime from, LocalDateTime to);
+
     List<Order> findByCustomer(Customer customer);
 
     List<Order> findByProduct(Product product);

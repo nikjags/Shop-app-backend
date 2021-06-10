@@ -32,19 +32,22 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<Order> findAllToDate(LocalDateTime toDate) {
-        return orderRepository.findAll()
-            .stream()
-            .filter(order -> order.getOrderedTime().isBefore(toDate))
-            .collect(Collectors.toList());
+    public List<Order> findAllFromDate(LocalDateTime fromDate) {
+        System.out.println("IN ALL FROM DATE");
+        return orderRepository.findAllFromDate(fromDate);
     }
 
     @Override
-    public List<Order> findAllFromDate(LocalDateTime fromDate) {
-        return orderRepository.findAll()
-            .stream()
-            .filter(order -> order.getOrderedTime().isAfter(fromDate))
-            .collect(Collectors.toList());
+    public List<Order> findAllToDate(LocalDateTime toDate) {
+        System.out.println("IN ALL TO DATE");
+
+        return orderRepository.findAllToDate(toDate);
+    }
+
+    @Override
+    public List<Order> findAllFromToDate(LocalDateTime from, LocalDateTime to) {
+        System.out.println("IN ALL FROM TO DATE");
+        return orderRepository.findAllFromDateToDate(from, to);
     }
 
     @Override

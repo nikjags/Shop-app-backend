@@ -18,7 +18,7 @@ import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = ShopApplication.class)
-public class CustomProductRepositoryIntegrationTest {
+public class CustomProductRepositoryIT {
 
     private static final Random randomGenerator = new Random();
 

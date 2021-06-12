@@ -13,7 +13,6 @@ import ru.study.shop.services.interfaces.ProductService;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 
 import static org.easymock.EasyMock.expect;
@@ -23,7 +22,7 @@ import static org.unitils.easymock.EasyMockUnitils.verify;
 
 @RunWith(UnitilsBlockJUnit4ClassRunner.class)
 public class ProductControllerTest {
-    public static final String STRING_VAL = "test";
+    private static final String STRING_VAL = "test";
     private static final Long TEST_PRICE = 7777L;
     private static final int PRODUCT_NAME_MAX_LENGTH = 100;
     private static final int PRODUCT_TYPE_MAX_LENGTH = 100;
@@ -181,19 +180,12 @@ public class ProductControllerTest {
 
     @Test
     public void editProductWithNullDto() {
-        expect(productService.findById(VALID_PRODUCT_ID)).andReturn(Optional.of(new Product()));
-        replay();
-
         assertThrows(ResponseStatusException.class, () -> productController.editProduct(VALID_PRODUCT_ID, null));
     }
 
     @Test
     public void editProductWithEmptyDto() {
         ProductDto emptyDto = new ProductDto();
-
-        expect(productService.findById(VALID_PRODUCT_ID)).andReturn(Optional.of(new Product()));
-        replay();
-
         assertThrows(ResponseStatusException.class, () -> productController.editProduct(VALID_PRODUCT_ID, emptyDto));
     }
 

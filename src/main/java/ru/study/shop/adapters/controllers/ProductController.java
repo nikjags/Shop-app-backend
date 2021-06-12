@@ -6,6 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.study.shop.adapters.controllers.dto.ProductDto;
+import ru.study.shop.adapters.controllers.utils.dto_validation.groups.OnCreate;
+import ru.study.shop.adapters.controllers.utils.dto_validation.groups.OnUpdate;
 import ru.study.shop.adapters.hibernate.impl.query_classes.ProductQueryConstraints;
 import ru.study.shop.adapters.hibernate.impl.query_classes.ProductQueryConstraints.Builder;
 import ru.study.shop.entities.Product;
@@ -15,10 +17,10 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 @RestController
@@ -27,6 +29,9 @@ public class ProductController {
     private static final String NO_SUCH_PRODUCT_MESSAGE = "no product with such ID is present";
     private static final String INVALID_ID_MESSAGE = "invalid ID; must be more than 0";
     private static final String NO_PROPERTIES_TO_UPDATE_MESSAGE = "no properties to update in request body";
+
+    private static final Class<OnCreate> CREATE_OPTION = OnCreate.class;
+    private static final Class<OnUpdate> UPDATE_OPTION = OnUpdate.class;
 
     private final ProductService productService;
 
@@ -93,7 +98,7 @@ public class ProductController {
 
     @PostMapping(value = "/new")
     public ResponseEntity<Product> createProduct(@RequestBody ProductDto newProduct) {
-        validateProductDto(newProduct);
+        validateProductDto(newProduct, CREATE_OPTION);
 
         return ResponseEntity.ok(productService.saveProduct(mapDtoToProduct(newProduct)));
     }
@@ -101,6 +106,7 @@ public class ProductController {
     @PutMapping(value = "/{id}")
     public ResponseEntity<Product> editProduct(@PathVariable("id") Long productId, @RequestBody ProductDto productChanges) {
         validateProductId(productId);
+        validateProductDto(productChanges, UPDATE_OPTION);
 
         Product editableProduct = checkForProductPresenceAngGet(productId);
 
@@ -124,82 +130,26 @@ public class ProductController {
     // = Implementation
     // ===================================================================================================================
 
-    private Product checkForProductPresenceAngGet(Long productId) {
-        Optional<Product> productOptional = productService.findById(productId);
-        if (!productOptional.isPresent()) {
-            throw new ResponseStatusException(
-                HttpStatus.BAD_REQUEST, NO_SUCH_PRODUCT_MESSAGE);
-        }
-        return productOptional.get();
-    }
-
     private void validateProductId(Long productId) {
-        if (Objects.isNull(productId) || productId < 1) {
+        if (isNull(productId) || productId < 1) {
             throw new ResponseStatusException(
                 HttpStatus.BAD_REQUEST, INVALID_ID_MESSAGE
             );
         }
     }
 
-    private void updateProduct(Product editableProduct, ProductDto productChanges) {
-        if (Objects.isNull(productChanges)) {
+    private void validateProductDto(ProductDto newProduct, Class<?> option) {
+        if (isNull(newProduct)) {
             throw new ResponseStatusException(
-                HttpStatus.BAD_REQUEST, NO_PROPERTIES_TO_UPDATE_MESSAGE
-            );
+                HttpStatus.BAD_REQUEST,
+                NO_PROPERTIES_TO_UPDATE_MESSAGE);
         }
 
-        boolean isChanged = false;
-
-        if (nonNull(productChanges.getProductName())
-            && validateDtoProperty(productChanges, "productName")) {
-
-            editableProduct.setProductName(productChanges.getProductName());
-            isChanged = true;
-        }
-        if (nonNull(productChanges.getProductType())
-            && validateDtoProperty(productChanges, "productType")) {
-
-            editableProduct.setProductType(productChanges.getProductType());
-            isChanged = true;
-        }
-        if (nonNull(productChanges.getMaterial())
-            && validateDtoProperty(productChanges, "material")) {
-
-            editableProduct.setMaterial(productChanges.getMaterial());
-            isChanged = true;
-        }
-        if (nonNull(productChanges.getManufacturer())
-            && validateDtoProperty(productChanges, "manufacturer")) {
-
-            editableProduct.setManufacturer(productChanges.getManufacturer());
-            isChanged = true;
-        }
-        if (nonNull(productChanges.getDescription())
-            && validateDtoProperty(productChanges, "description")) {
-
-            editableProduct.setDescription(productChanges.getDescription());
-            isChanged = true;
-        }
-        if (nonNull(productChanges.getPrice())
-            && validateDtoProperty(productChanges, "price")) {
-
-            editableProduct.setPrice(productChanges.getPrice());
-            isChanged = true;
+        if (isNull(option) || !option.equals(UPDATE_OPTION)) {
+            option = CREATE_OPTION;
         }
 
-        if (!isChanged) {
-            throw new ResponseStatusException(
-                HttpStatus.BAD_REQUEST, NO_PROPERTIES_TO_UPDATE_MESSAGE
-            );
-        }
-    }
-
-    private boolean validateDtoProperty(ProductDto productChanges, String propertyName) {
-        return validator.validateProperty(productChanges, propertyName).isEmpty();
-    }
-
-    private void validateProductDto(ProductDto newProduct) {
-        Set<ConstraintViolation<ProductDto>> violations = validator.validate(newProduct);
+        Set<ConstraintViolation<ProductDto>> violations = validator.validate(newProduct, option);
 
         if (!violations.isEmpty()) {
             StringBuilder str = new StringBuilder();
@@ -208,6 +158,34 @@ public class ProductController {
             }
             throw new ResponseStatusException(
                 HttpStatus.BAD_REQUEST, str.toString());
+        }
+    }
+
+    private Product checkForProductPresenceAngGet(Long productId) {
+        return productService
+            .findById(productId)
+            .orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.BAD_REQUEST, NO_SUCH_PRODUCT_MESSAGE));
+    }
+
+    private void updateProduct(Product editableProduct, ProductDto productChanges) {
+        if (nonNull(productChanges.getProductName())) {
+            editableProduct.setProductName(productChanges.getProductName());
+        }
+        if (nonNull(productChanges.getProductType())) {
+            editableProduct.setProductType(productChanges.getProductType());
+        }
+        if (nonNull(productChanges.getMaterial())) {
+            editableProduct.setMaterial(productChanges.getMaterial());
+        }
+        if (nonNull(productChanges.getManufacturer())) {
+            editableProduct.setManufacturer(productChanges.getManufacturer());
+        }
+        if (nonNull(productChanges.getDescription())) {
+            editableProduct.setDescription(productChanges.getDescription());
+        }
+        if (nonNull(productChanges.getPrice())) {
+            editableProduct.setPrice(productChanges.getPrice());
         }
     }
 

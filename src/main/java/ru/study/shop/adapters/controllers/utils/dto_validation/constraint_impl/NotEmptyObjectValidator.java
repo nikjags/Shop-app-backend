@@ -28,7 +28,7 @@ public class NotEmptyObjectValidator implements ConstraintValidator<NotEmptyObje
                 Object propertyValue = propertyDescriptor.getReadMethod().invoke(value);
 
                 if (isNull(propertyValue)) {
-                    return true;
+                    return false;
                 }
             } catch (IntrospectionException | IllegalAccessException | InvocationTargetException e) {
                 e.printStackTrace();

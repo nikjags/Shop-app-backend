@@ -31,7 +31,7 @@ import static org.unitils.easymock.EasyMockUnitils.verify;
 
 @RunWith(UnitilsBlockJUnit4ClassRunner.class)
 public class OrderControllerTest {
-    public static final int ZERO_AMOUNT = 0;
+    private static final int ZERO_AMOUNT = 0;
     private static final int ORDER_LIST_SIZE = 10;
     private static final LocalDateTime SOME_DATE = of(2021, 6, 10, 15, 35);
     private static final LocalDateTime MIN_LOCAL_DATE_TIME = OrderRepository.MIN_ORDER_DATE_TIME;

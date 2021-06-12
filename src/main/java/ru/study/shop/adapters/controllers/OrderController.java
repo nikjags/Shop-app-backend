@@ -1,11 +1,13 @@
 package ru.study.shop.adapters.controllers;
 
-import org.apache.commons.validator.GenericValidator;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import ru.study.shop.adapters.controllers.dto.OrderDto;
+import ru.study.shop.adapters.controllers.utils.dto_validation.groups.OnCreate;
+import ru.study.shop.adapters.controllers.utils.dto_validation.groups.OnUpdate;
 import ru.study.shop.entities.Customer;
 import ru.study.shop.entities.Order;
 import ru.study.shop.entities.Product;
@@ -17,21 +19,22 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 @RestController
 @RequestMapping("/orders")
 public class OrderController {
-    private static final Locale DATE_TIME_LOCALE = DateTimeFormatter.ISO_DATE_TIME.getLocale();
-    private static final String NO_SUCH_PRODUCT_MESSAGE = "no such product with  provided ID: ";
-    private static final String NO_CUSTOMER_MESSAGE = "no such customer with provided ID";
-    private static final String NO_SUCH_ORDER_MESSAGE = "no such order with provided ID";
-    private static final String INVALID_ID_MESSAGE = "invalid ID; must be more than 0";
+    private static final Class<OnCreate> CREATE_OPTION = OnCreate.class;
+    private static final Class<OnUpdate> UPDATE_OPTION = OnUpdate.class;
+
+    private static final String INVALID_ORDER_ID_MESSAGE = "invalid order ID; must be more than 0";
+    private static final String NO_SUCH_PRODUCT_MESSAGE = "no such product with provided ID: ";
+    private static final String NO_CUSTOMER_MESSAGE = "no such customer with provided ID: ";
+    private static final String NO_SUCH_ORDER_MESSAGE = "no such order with provided ID: ";
     private static final String NO_PROPERTIES_TO_UPDATE_MESSAGE = "no properties to update in request body";
 
     private final OrderService orderService;
@@ -49,29 +52,23 @@ public class OrderController {
     }
 
     @GetMapping(produces = "application/json")
-    public ResponseEntity<List<Order>> getAllOrdersByDate(
-        @RequestParam(name = "from", required = false) String strFromTime,
-        @RequestParam(name = "to", required = false) String strToTime) {
+    public ResponseEntity<List<Order>> getAllOrders(
+        @RequestParam(name = "fromDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDT,
+        @RequestParam(name = "toDate", required = false) LocalDateTime toDT) {
 
-        LocalDateTime dateTimeFrom = LocalDateTime.MIN;
-        LocalDateTime dateTimeTo = LocalDateTime.MAX;
+        List<Order> result;
 
-        if (Objects.isNull(strFromTime) && Objects.isNull(strToTime)) {
-            return ResponseEntity.ok().body(orderService.findAll());
-        }
-        if (nonNull(strFromTime) && GenericValidator.isDate(strFromTime, DATE_TIME_LOCALE)) {
-            dateTimeFrom = LocalDateTime.parse(strFromTime);
-        }
-        if (nonNull(strToTime) && GenericValidator.isDate(strToTime, DATE_TIME_LOCALE)) {
-            dateTimeTo = LocalDateTime.parse(strToTime);
+        if (isNull(fromDT) && isNull(toDT)) {
+            result = orderService.findAll();
+        } else if (nonNull(fromDT) && isNull(toDT)) {
+            result = orderService.findAllFromDate(fromDT);
+        } else if (isNull(fromDT)) {
+            result = orderService.findAllToDate(toDT);
+        } else {
+            result = orderService.findAllFromToDate(fromDT, toDT);
         }
 
-        LocalDateTime finalDateTimeFrom = dateTimeTo;
-        return ResponseEntity.ok().body(
-            orderService.findAllFromDate(dateTimeFrom)
-                .stream()
-                .filter(order -> order.getOrderedTime().isBefore(finalDateTimeFrom))
-                .collect(Collectors.toList()));
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping(value = "/{id}", produces = "application/json")
@@ -80,16 +77,14 @@ public class OrderController {
 
         return orderService.findById(orderId)
             .map(ResponseEntity::ok)
-            .orElseGet(() -> ResponseEntity.badRequest().body(null));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, NO_SUCH_PRODUCT_MESSAGE + orderId));
     }
 
     @PostMapping(value = "/new", produces = "application/json")
     public ResponseEntity<Order> createOrder(@RequestBody OrderDto newOrderDto) {
-        validateOrderDto(newOrderDto);
+        validateOrderDto(newOrderDto, CREATE_OPTION);
 
-        Customer orderCustomer = getOrderCustomer(newOrderDto.getCustomerId());
-
-        Order newOrder = mapDtoToOrder(newOrderDto, orderCustomer);
+        Order newOrder = mapDtoToOrder(newOrderDto);
 
         return ResponseEntity.ok(orderService.saveOrder(newOrder));
     }
@@ -97,13 +92,12 @@ public class OrderController {
     @PutMapping(value = "/{id}")
     public ResponseEntity<Order> editOrder(@PathVariable("id") Long orderId, @RequestBody OrderDto orderDto) {
         validateOrderId(orderId);
+        validateOrderDto(orderDto, UPDATE_OPTION);
 
         Order editableOrder = checkForPresenceAndGetOrder(orderId);
-
         updateOrder(editableOrder, orderDto);
-        orderService.saveOrder(editableOrder);
 
-        return ResponseEntity.ok(editableOrder);
+        return ResponseEntity.ok(orderService.saveOrder(editableOrder));
     }
 
     @DeleteMapping(value = "/{id}")
@@ -120,112 +114,122 @@ public class OrderController {
     // = Implementation
     // ===================================================================================================================
 
-    private void updateOrder(Order editableOrder, OrderDto orderDto) {
-        boolean isChanged = false;
-
-        if (nonNull(orderDto.getProductIdAmountMap())
-            && validateDtoProperty(orderDto, "productIdAmountMap")) {
-
-            editableOrder.setProductList(dtoProductMapToList(orderDto.getProductIdAmountMap()));
-            isChanged = true;
-        }
-        if (nonNull(orderDto.getOrderedTime())
-            && validateDtoProperty(orderDto, "orderedTime")) {
-
-            editableOrder.setOrderedTime(orderDto.getOrderedTime());
-            isChanged = true;
-        }
-        if (validateDtoProperty(orderDto, "delivered")) {
-
-            editableOrder.setDelivered(orderDto.isDelivered());
-            isChanged = true;
-        }
-
-        if (!isChanged) {
-            throw new ResponseStatusException(
-                HttpStatus.BAD_REQUEST, NO_PROPERTIES_TO_UPDATE_MESSAGE
-            );
-        }
-    }
-
-    private boolean validateDtoProperty(OrderDto orderDto, String propertyName) {
-        return validator.validateProperty(orderDto, propertyName).isEmpty();
-    }
-
     private void validateOrderId(Long orderId) {
         if (orderId < 1) {
             throw new ResponseStatusException(
-                HttpStatus.BAD_REQUEST, INVALID_ID_MESSAGE
-            );
+                HttpStatus.BAD_REQUEST,
+                INVALID_ORDER_ID_MESSAGE);
         }
     }
 
-    private Order mapDtoToOrder(OrderDto newOrderDto, Customer orderCustomer) {
-        return new Order(orderCustomer,
+    private void validateOrderDto(OrderDto dto, Class<?> option) {
+        if (isNull(dto)) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                NO_PROPERTIES_TO_UPDATE_MESSAGE);
+        }
+
+        if (isNull(option) || !option.equals(UPDATE_OPTION)) {
+            option = CREATE_OPTION;
+        }
+
+        Set<ConstraintViolation<OrderDto>> violations = validator.validate(dto, option);
+
+        if (!violations.isEmpty()) {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("violations: [");
+            for (ConstraintViolation<OrderDto> violation : violations) {
+                stringBuilder
+                    .append(violation.getPropertyPath())
+                    .append(": ")
+                    .append(violation.getMessage())
+                    .append("; ");
+            }
+            stringBuilder.append("]");
+
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST, stringBuilder.toString());
+        }
+    }
+
+    private void updateOrder(Order editableOrder, OrderDto orderDto) {
+        if (nonNull(orderDto.getCustomerId()) &&
+            !orderDto.getCustomerId().equals(editableOrder.getCustomer().getId())) {
+
+            editableOrder.setCustomer(
+                checkForPresenceAndGetCustomer(orderDto.getCustomerId()));
+        }
+
+        if (nonNull(orderDto.getProductIdAmountMap())) {
+
+            editableOrder.setProductList(
+                dtoProductMapToList(orderDto.getProductIdAmountMap()));
+        }
+        if (nonNull(orderDto.getOrderedTime())) {
+
+            editableOrder.setOrderedTime(orderDto.getOrderedTime());
+        }
+        if (nonNull(orderDto.getDelivered()) &&
+            editableOrder.isDelivered() != orderDto.getDelivered()) {
+
+            editableOrder.setDelivered(orderDto.getDelivered());
+        }
+    }
+
+    private Order mapDtoToOrder(OrderDto newOrderDto) {
+        Optional<Customer> optionalCustomer = customerService.findById(newOrderDto.getCustomerId());
+        if (!optionalCustomer.isPresent()) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST, NO_CUSTOMER_MESSAGE);
+        }
+
+        return new Order(
+            optionalCustomer.get(),
             dtoProductMapToList(newOrderDto.getProductIdAmountMap()),
             newOrderDto.getOrderedTime(),
-            newOrderDto.isDelivered());
+            newOrderDto.getDelivered());
     }
 
     private List<Product> dtoProductMapToList(Map<Long, Integer> productIdAmount) {
         List<Product> productList = new ArrayList<>();
 
         for (Entry<Long, Integer> entry : productIdAmount.entrySet()) {
-            Long id = entry.getKey();
-            Integer amount = entry.getValue();
-            Optional<Product> optionalProduct = productService.findById(id);
+            Long productId = entry.getKey();
 
-            if (!optionalProduct.isPresent()) {
-                throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, NO_SUCH_PRODUCT_MESSAGE + id
-                );
-            }
-            if (amount < 1) {
-                throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "invalid product amount for ID = " + id + "; must be more than 0"
-                );
-            }
+            Product product = checkForPresenceAndGetProduct(productId);
 
             for (int i = 0; i < entry.getValue(); i++) {
-                productList.add(optionalProduct.get());
+                productList.add(product);
             }
         }
 
         return productList;
     }
 
-    private void validateOrderDto(OrderDto newOrder) {
-        Set<ConstraintViolation<OrderDto>> violations = validator.validate(newOrder);
-
-        if (!violations.isEmpty()) {
-            StringBuilder str = new StringBuilder();
-            for (ConstraintViolation<OrderDto> violation : violations) {
-                str.append(violation.getPropertyPath()).append(": ").append(violation.getMessage()).append("; ");
-            }
-            throw new ResponseStatusException(
-                HttpStatus.BAD_REQUEST, str.toString());
-        }
-    }
-
     private Order checkForPresenceAndGetOrder(Long orderId) {
-        Optional<Order> optionalOrder = orderService.findById(orderId);
-        if (!optionalOrder.isPresent()) {
-            throw new ResponseStatusException(
-                HttpStatus.BAD_REQUEST, NO_SUCH_ORDER_MESSAGE
-            );
-        }
-
-        return optionalOrder.get();
+        return orderService
+            .findById(orderId)
+            .orElseThrow(() ->
+                new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    NO_SUCH_ORDER_MESSAGE + orderId));
     }
 
-    private Customer getOrderCustomer(Long customerId) {
-        Optional<Customer> optionalCustomer = customerService.findById(customerId);
-        if (!optionalCustomer.isPresent()) {
-            throw new ResponseStatusException(
-                HttpStatus.BAD_REQUEST, NO_CUSTOMER_MESSAGE
-            );
-        }
+    private Customer checkForPresenceAndGetCustomer(Long customerId) {
+        return customerService
+            .findById(customerId)
+            .orElseThrow(() ->
+                new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    NO_CUSTOMER_MESSAGE + customerId));
+    }
 
-        return optionalCustomer.get();
+    private Product checkForPresenceAndGetProduct(Long productId) {
+        return productService
+            .findById(productId)
+            .orElseThrow(() ->
+                new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    NO_SUCH_PRODUCT_MESSAGE + productId));
     }
 }

@@ -12,13 +12,15 @@ public interface StockService {
 
     List<Stock> findAll();
 
+    List<Stock> findByProductId(Long productId);
+
+    List<Stock> findBySize(String size);
+
     Optional<Stock> findByProductIdAndSize(Long productId, String size);
 
     List<Stock> findByProduct(Product product);
 
     List<Stock> findEmptyStocks();
-
-    List<Stock> findBySize(String size);
 
     Stock saveStock(Stock stock);
 }

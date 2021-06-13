@@ -8,7 +8,8 @@ import ru.study.shop.services.interfaces.StockService;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
+import static java.util.Objects.isNull;
 
 @Service
 public class StockServiceImpl implements StockService {
@@ -26,26 +27,35 @@ public class StockServiceImpl implements StockService {
 
     @Override
     public List<Stock> findByProduct(Product product) {
-        return stockRepository.findAll()
-            .stream()
-            .filter(stock -> stock.getProduct().equals(product))
-            .collect(Collectors.toList());
+        return stockRepository.findByProduct(product);
     }
 
     @Override
-    public List<Stock> findEmptyStocks() {
-        return stockRepository.findAll()
-            .stream()
-            .filter(stock -> stock.getQuantity() == 0)
-            .collect(Collectors.toList());
+    public List<Stock> findByProductId(Long productId) {
+        if (isNull(productId)) {
+            return findAll();
+        }
+
+        return stockRepository.findByProductId(productId);
     }
 
     @Override
     public List<Stock> findBySize(String size) {
-        return stockRepository.findAll()
-            .stream()
-            .filter(stock -> stock.getSize().equals(size))
-            .collect(Collectors.toList());
+        if (isNull(size)) {
+            return findAll();
+        }
+
+        return stockRepository.findBySize(size);
+    }
+
+    @Override
+    public Optional<Stock> findByProductIdAndSize(Long productId, String size) {
+        return stockRepository.findByProductIdAndSize(productId, size);
+    }
+
+    @Override
+    public List<Stock> findEmptyStocks() {
+        return stockRepository.findEmptyStocks();
     }
 
     @Override
@@ -56,10 +66,5 @@ public class StockServiceImpl implements StockService {
     @Override
     public void deleteStock(Stock stock) {
         stockRepository.delete(stock);
-    }
-
-    @Override
-    public Optional<Stock> findByProductIdAndSize(Long productId, String size) {
-        return stockRepository.findByProductIdAndSize(productId, size);
     }
 }

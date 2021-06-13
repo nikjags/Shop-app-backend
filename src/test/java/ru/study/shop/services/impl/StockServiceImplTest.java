@@ -13,15 +13,15 @@ import ru.study.shop.entities.Stock;
 import ru.study.shop.services.interfaces.StockService;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.util.Lists.emptyList;
 import static org.easymock.EasyMock.expect;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.unitils.easymock.EasyMockUnitils.replay;
 
 @RunWith(UnitilsBlockJUnit4ClassRunner.class)
 public class StockServiceImplTest {
+    public static final String SIZE_REPRESENTED_IN_LIST = "41";
     private static final Product PRODUCT_1 = new Product(
         "Продукт 1",
         "тип 1",
@@ -50,9 +50,6 @@ public class StockServiceImplTest {
         "Производитель 1",
         "",
         2000L);
-    public static final String SIZE_NOT_REPRESENTED_IN_STOCK = "42";
-    public static final String SIZE_REPRESENTED_IN_LIST = "41";
-
     @Mock
     StockRepository stockRepository;
 
@@ -65,8 +62,8 @@ public class StockServiceImplTest {
     }
 
     @Test
-    public void findByProductWithEmptyProduct() {
-        expect(stockRepository.findAll()).andReturn(STOCK_LIST);
+    public void findByProductWithNullProduct() {
+        expect(stockRepository.findByProduct(null)).andReturn(emptyList());
         replay();
 
         List<Stock> result = stockService.findByProduct(null);
@@ -76,76 +73,40 @@ public class StockServiceImplTest {
 
     @Test
     public void findByProductNoStockForProduct() {
-        expect(stockRepository.findAll()).andReturn(STOCK_LIST);
+        expect(stockRepository.findByProduct(PRODUCT_NOT_REPRESENTED_IN_LIST)).andReturn(emptyList());
         replay();
 
         List<Stock> result = stockService.findByProduct(PRODUCT_NOT_REPRESENTED_IN_LIST);
         assertEquals(emptyList(), result);
-
     }
 
     @Test
     public void findByProductRepresentedInStock() {
-        expect(stockRepository.findAll()).andReturn(STOCK_LIST);
+        expect(stockRepository.findByProduct(PRODUCT_1)).andReturn(STOCK_LIST);
         replay();
 
         List<Stock> result = stockService.findByProduct(PRODUCT_1);
-        assertEquals(
-            STOCK_LIST.stream()
-                .filter(stock -> stock.getProduct().equals(PRODUCT_1))
-                .collect(Collectors.toList()),
-            result);
+        assertEquals(STOCK_LIST, result);
     }
 
-    @Test
-    public void findEmptyStocksNoEmptyStocksRepresented() {
-        expect(stockRepository.findAll()).andReturn(
-            STOCK_LIST.stream()
-            .filter(stock -> !stock.getQuantity().equals(0L))
-                .collect(Collectors.toList()));
-        replay();
-
-        List<Stock> result = stockService.findEmptyStocks();
-
-        assertEquals(emptyList(), result);
-
-    }
 
     @Test
     public void findEmptyStocksWithEmptyStocksRepresented() {
-        expect(stockRepository.findAll()).andReturn(STOCK_LIST);
+        expect(stockRepository.findEmptyStocks()).andReturn(STOCK_LIST);
         replay();
 
         List<Stock> result = stockService.findEmptyStocks();
 
-        assertEquals(
-            STOCK_LIST.stream()
-                .filter(stock -> stock.getQuantity().equals(0L))
-                .collect(Collectors.toList()),
-            result);
-    }
-
-    @Test
-    public void findBySizeNoSizeRepresented() {
-        expect(stockRepository.findAll()).andReturn(STOCK_LIST);
-        replay();
-
-        List<Stock> result = stockService.findBySize(SIZE_NOT_REPRESENTED_IN_STOCK);
-
-        assertEquals(emptyList(), result);
+        assertEquals(STOCK_LIST, result);
     }
 
     @Test
     public void findBySizeRepresentedInStock() {
-        expect(stockRepository.findAll()).andReturn(STOCK_LIST);
+        expect(stockRepository.findBySize(SIZE_REPRESENTED_IN_LIST)).andReturn(STOCK_LIST);
         replay();
 
         List<Stock> result = stockService.findBySize(SIZE_REPRESENTED_IN_LIST);
 
-        assertEquals(
-            STOCK_LIST.stream()
-                .filter(stock -> stock.getSize().equals(SIZE_REPRESENTED_IN_LIST))
-                .collect(Collectors.toList()),
-            result);
+        assertEquals(STOCK_LIST, result);
     }
 }

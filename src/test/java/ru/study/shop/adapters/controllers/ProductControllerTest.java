@@ -4,18 +4,24 @@ import org.easymock.TestSubject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 import org.unitils.UnitilsBlockJUnit4ClassRunner;
 import org.unitils.easymock.annotation.Mock;
 import ru.study.shop.adapters.controllers.dto.ProductDto;
+import ru.study.shop.entities.Order;
 import ru.study.shop.entities.Product;
 import ru.study.shop.services.interfaces.ProductService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.unitils.easymock.EasyMockUnitils.replay;
 import static org.unitils.easymock.EasyMockUnitils.verify;
@@ -196,6 +202,31 @@ public class ProductControllerTest {
 
         assertThrows(ResponseStatusException.class, () -> productController.deleteProduct(negativeIdIsInvalid));
         assertThrows(ResponseStatusException.class, () -> productController.deleteProduct(zeroIdIsInvalid));
+    }
+
+    @Test
+    public void deleteProductIdWithValidAndNonPresentIdThrowsException() {
+        Order deletableOrder = new Order();
+
+        expect(productService.findById(VALID_PRODUCT_ID)).andReturn(Optional.empty()).atLeastOnce();
+        replay();
+
+        assertThrows(ResponseStatusException.class, () -> productController.deleteProduct(VALID_PRODUCT_ID));
+    }
+
+    @Test
+    public void deleteProductIdWithValidAndPresentIdReturnsOk() {
+        Product deletableProduct = new Product();
+        deletableProduct.setId(VALID_PRODUCT_ID);
+
+        expect(productService.findById(VALID_PRODUCT_ID)).andReturn(Optional.of(deletableProduct)).atLeastOnce();
+        productService.deleteProduct(deletableProduct);
+        expectLastCall();
+        replay();
+
+        ResponseEntity<Product> response = productController.deleteProduct(deletableProduct.getId());
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
 

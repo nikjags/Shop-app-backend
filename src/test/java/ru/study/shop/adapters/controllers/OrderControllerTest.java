@@ -4,6 +4,8 @@ import org.easymock.TestSubject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 import org.unitils.UnitilsBlockJUnit4ClassRunner;
 import org.unitils.easymock.annotation.Mock;
@@ -25,6 +27,7 @@ import static java.time.LocalDateTime.ofEpochSecond;
 import static java.util.Objects.isNull;
 import static java.util.concurrent.ThreadLocalRandom.current;
 import static org.easymock.EasyMock.*;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.unitils.easymock.EasyMockUnitils.replay;
 import static org.unitils.easymock.EasyMockUnitils.verify;
@@ -265,6 +268,37 @@ public class OrderControllerTest {
         mapWithZeroProductAmount.put(VALID_PRODUCT_ID, ZERO_AMOUNT);
         dtoWithZeroProductAmount.setProductIdAmountMap(mapWithZeroProductAmount);
         assertThrows(ResponseStatusException.class, () -> orderController.editOrder(VALID_ORDER_ID, dtoWithZeroProductAmount));
+    }
+
+    @Test
+    public void deleteOrderInvalidIdThrowsException() {
+        assertThrows(ResponseStatusException.class, () -> orderController.deleteOrder(NEGATIVE_ORDER_ID));
+        assertThrows(ResponseStatusException.class, () -> orderController.deleteOrder(ZERO_ORDER_ID));
+    }
+
+    @Test
+    public void deleteOrderValidAndNonPresentIdThrowsException() {
+        Order deletableOrder = new Order();
+
+        expect(orderService.findById(VALID_ORDER_ID)).andReturn(Optional.empty()).atLeastOnce();
+        replay();
+
+        assertThrows(ResponseStatusException.class, () -> orderController.deleteOrder(VALID_ORDER_ID));
+    }
+
+    @Test
+    public void deleteOrderValidAndPresentIdReturnsOk() {
+        Order deletableOrder = new Order();
+        deletableOrder.setId(VALID_ORDER_ID);
+
+        expect(orderService.findById(VALID_ORDER_ID)).andReturn(Optional.of(deletableOrder)).atLeastOnce();
+        orderService.deleteOrder(deletableOrder);
+        expectLastCall();
+        replay();
+
+        ResponseEntity<Order> response = orderController.deleteOrder(deletableOrder.getId());
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
     // ===================================================================================================================

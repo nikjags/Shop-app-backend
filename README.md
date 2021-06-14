@@ -130,9 +130,6 @@ localhost:8080/shop/api/v3/api-docs/
 
 <img src="src/main/resources/docs/Entities.png" width="800">
 
-Нужно отметить, что в проекте в качестве первичного ключа для класса `Stock` используется не суррогатный ключ, а составной ключ с полями `Product` и `Size`; для
-этих целей был создан класс `StockId` (требование JPA).
-
 # P.S.
 
 А frontend будет ближе к выходным.

@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/app")
+@RequestMapping("app")
 public class ApplicationController {
 
     private static final int DEFAULT_SHUTDOWN_CODE = 0;

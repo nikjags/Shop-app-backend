@@ -26,7 +26,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 @RestController
-@RequestMapping("/orders")
+@RequestMapping("orders")
 public class OrderController {
     private static final Class<OnCreate> CREATE_OPTION = OnCreate.class;
     private static final Class<OnUpdate> UPDATE_OPTION = OnUpdate.class;

@@ -24,7 +24,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 @RestController
-@RequestMapping("/products")
+@RequestMapping("products")
 public class ProductController {
     private static final String NO_SUCH_PRODUCT_MESSAGE = "no product with such ID is present";
     private static final String INVALID_ID_MESSAGE = "invalid ID; must be more than 0";

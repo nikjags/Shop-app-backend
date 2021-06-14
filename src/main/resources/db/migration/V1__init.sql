@@ -29,10 +29,11 @@ CREATE TABLE orders_product (
 );
 
 CREATE TABLE stock (
-  product_id int,
-  size varchar2(10),
+  id SERIAL PRIMARY KEY,
+  product_id int NOT NULL,
+  size varchar2(10) NOT NULL,
   quantity int NOT NULL,
-  PRIMARY KEY (product_id, size)
+  CONSTRAINT UC_Person UNIQUE (product_id, size)
 );
 
 ALTER TABLE orders ADD FOREIGN KEY (customer_id) REFERENCES customer (id);

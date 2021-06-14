@@ -17,6 +17,7 @@ import java.util.List;
 import static org.assertj.core.util.Lists.emptyList;
 import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.unitils.easymock.EasyMockUnitils.replay;
 
 @RunWith(UnitilsBlockJUnit4ClassRunner.class)
@@ -37,11 +38,11 @@ public class StockServiceImplTest {
         "",
         2000L);
     private static final List<Stock> STOCK_LIST = Lists.list(
-        new Stock(PRODUCT_1, "40", 50L),
-        new Stock(PRODUCT_1, "33", 23L),
-        new Stock(PRODUCT_1, "45", 0L),
-        new Stock(PRODUCT_2, "41", 32L),
-        new Stock(PRODUCT_2, "33", 15L)
+        new Stock(1L, PRODUCT_1, "40", 50L),
+        new Stock(2L, PRODUCT_1, "33", 23L),
+        new Stock(3L, PRODUCT_1, "45", 0L),
+        new Stock(4L, PRODUCT_2, "41", 32L),
+        new Stock(5L, PRODUCT_2, "33", 15L)
     );
     private static final Product PRODUCT_NOT_REPRESENTED_IN_LIST = new Product(
         "Продукт 3",
@@ -62,13 +63,8 @@ public class StockServiceImplTest {
     }
 
     @Test
-    public void findByProductWithNullProduct() {
-        expect(stockRepository.findByProduct(null)).andReturn(emptyList());
-        replay();
-
-        List<Stock> result = stockService.findByProduct(null);
-
-        assertEquals(emptyList(), result);
+    public void findByProduct_WithNullProduct_ThrowsNPE() {
+        assertThrows(NullPointerException.class, () -> stockService.findByProduct(null));
     }
 
     @Test

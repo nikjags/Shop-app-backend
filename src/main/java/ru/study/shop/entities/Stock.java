@@ -1,36 +1,37 @@
 package ru.study.shop.entities;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIdentityReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.NaturalId;
 
 import javax.persistence.*;
 
 @Entity
-@Data
 @Table(name = "STOCK")
-@IdClass(StockId.class)
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonPropertyOrder({"productId", "size", "quantity"})
 public class Stock {
     @Id
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
     @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
     @JsonIdentityReference(alwaysAsId = true)
-    @JoinColumn(name = "product_id")
+    @JsonProperty("productId")
+    @NaturalId
     private Product product;
 
-    @Id
+    @NaturalId
     private String size;
 
     private Long quantity;
-
-    public Stock() {
-
-    }
-
-    public Stock(Product product, String size, Long quantity) {
-        this.product = product;
-        this.size = size;
-        this.quantity = quantity;
-    }
 }
+
+

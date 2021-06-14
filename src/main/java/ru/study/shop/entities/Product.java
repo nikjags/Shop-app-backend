@@ -3,14 +3,11 @@ package ru.study.shop.entities;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.io.Serializable;
 
 @Entity
 @Data
 @Table(name = "PRODUCT")
-public class Product implements Serializable {
-    private static final long serialVersionUID = 878054394L;
-
+public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

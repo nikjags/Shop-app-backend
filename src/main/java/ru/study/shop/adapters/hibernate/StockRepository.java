@@ -4,12 +4,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.study.shop.entities.Product;
 import ru.study.shop.entities.Stock;
-import ru.study.shop.entities.StockId;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface StockRepository extends JpaRepository<Stock, StockId> {
+public interface StockRepository extends JpaRepository<Stock, Long> {
     Optional<Stock> findByProductIdAndSize(Long productId, String size);
 
     List<Stock> findByProduct(Product product);
@@ -29,4 +28,6 @@ public interface StockRepository extends JpaRepository<Stock, StockId> {
         "FROM Stock s " +
         "WHERE s.quantity <> 0")
     List<Stock> findNonEmptyStocks();
+
+    void deleteByProductIdAndSize(Long productId, String size);
 }

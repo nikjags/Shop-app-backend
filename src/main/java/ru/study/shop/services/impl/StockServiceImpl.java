@@ -1,5 +1,6 @@
 package ru.study.shop.services.impl;
 
+import lombok.NonNull;
 import org.springframework.stereotype.Service;
 import ru.study.shop.adapters.hibernate.StockRepository;
 import ru.study.shop.entities.Product;
@@ -8,8 +9,6 @@ import ru.study.shop.services.interfaces.StockService;
 
 import java.util.List;
 import java.util.Optional;
-
-import static java.util.Objects.isNull;
 
 @Service
 public class StockServiceImpl implements StockService {
@@ -26,30 +25,27 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
-    public List<Stock> findByProduct(Product product) {
+    public Optional<Stock> findByStockId(@NonNull Long stockId) {
+        return stockRepository.findById(stockId);
+    }
+
+    @Override
+    public List<Stock> findByProduct(@NonNull Product product) {
         return stockRepository.findByProduct(product);
     }
 
     @Override
-    public List<Stock> findByProductId(Long productId) {
-        if (isNull(productId)) {
-            return findAll();
-        }
-
+    public List<Stock> findByProductId(@NonNull Long productId) {
         return stockRepository.findByProductId(productId);
     }
 
     @Override
-    public List<Stock> findBySize(String size) {
-        if (isNull(size)) {
-            return findAll();
-        }
-
+    public List<Stock> findBySize(@NonNull String size) {
         return stockRepository.findBySize(size);
     }
 
     @Override
-    public Optional<Stock> findByProductIdAndSize(Long productId, String size) {
+    public Optional<Stock> findByProductIdAndSize(@NonNull Long productId, @NonNull String size) {
         return stockRepository.findByProductIdAndSize(productId, size);
     }
 
@@ -59,12 +55,17 @@ public class StockServiceImpl implements StockService {
     }
 
     @Override
-    public Stock saveStock(Stock stock) {
+    public Stock saveStock(@NonNull Stock stock) {
         return stockRepository.save(stock);
     }
 
     @Override
     public void deleteStock(Stock stock) {
         stockRepository.delete(stock);
+    }
+
+    @Override
+    public void deleteAllStocks(List<Stock> stocks) {
+        stockRepository.deleteAll(stocks);
     }
 }

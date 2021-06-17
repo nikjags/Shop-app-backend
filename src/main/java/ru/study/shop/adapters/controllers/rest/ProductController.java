@@ -1,4 +1,4 @@
-package ru.study.shop.adapters.controllers;
+package ru.study.shop.adapters.controllers.rest;
 
 import org.apache.commons.validator.GenericValidator;
 import org.springframework.http.HttpStatus;

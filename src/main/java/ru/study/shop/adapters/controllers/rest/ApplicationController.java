@@ -1,4 +1,4 @@
-package ru.study.shop.adapters.controllers;
+package ru.study.shop.adapters.controllers.rest;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ApplicationContext;

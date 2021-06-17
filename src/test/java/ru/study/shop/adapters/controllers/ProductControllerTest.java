@@ -10,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.unitils.UnitilsBlockJUnit4ClassRunner;
 import org.unitils.easymock.annotation.Mock;
 import ru.study.shop.adapters.controllers.dto.ProductDto;
+import ru.study.shop.adapters.controllers.rest.ProductController;
 import ru.study.shop.entities.Order;
 import ru.study.shop.entities.Product;
 import ru.study.shop.services.interfaces.ProductService;

@@ -8,6 +8,10 @@ import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -19,9 +23,9 @@ public class NotEmptyObjectValidator implements ConstraintValidator<NotEmptyObje
             return true;
         }
 
-        Field[] fields = value.getClass().getDeclaredFields();
+        List<Field> nonSFFields = getNonStaticNonFinalFields(value.getClass().getDeclaredFields());
 
-        for (Field field : fields) {
+        for (Field field : nonSFFields) {
             String fieldName = field.getName();
 
             try {
@@ -38,5 +42,16 @@ public class NotEmptyObjectValidator implements ConstraintValidator<NotEmptyObje
         }
 
         return false;
+    }
+
+    // ===================================================================================================================
+    // = Implementation
+    // ===================================================================================================================
+
+    private List<Field> getNonStaticNonFinalFields(Field[] fields) {
+        return Arrays.stream(fields).filter(field -> {
+            int modifiers = field.getModifiers();
+            return Modifier.isFinal(modifiers) || Modifier.isStatic(modifiers);
+        }).collect(Collectors.toList());
     }
 }

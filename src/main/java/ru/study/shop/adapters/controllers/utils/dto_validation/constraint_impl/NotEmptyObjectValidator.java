@@ -50,9 +50,10 @@ public class NotEmptyObjectValidator implements ConstraintValidator<NotEmptyObje
     // ===================================================================================================================
 
     private List<Field> getNonStaticNonFinalFields(Field[] fields) {
-        return stream(fields).filter(field -> {
-            int modifiers = field.getModifiers();
-            return !(isFinal(modifiers) || isStatic(modifiers));
-        }).collect(Collectors.toList());
+        return stream(fields).
+            filter(field -> {
+                int modifiers = field.getModifiers();
+                return !(isFinal(modifiers) || isStatic(modifiers));
+            }).collect(Collectors.toList());
     }
 }

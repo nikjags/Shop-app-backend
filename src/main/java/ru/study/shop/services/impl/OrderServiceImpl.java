@@ -1,6 +1,9 @@
 package ru.study.shop.services.impl;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import ru.study.shop.adapters.controllers.order_delivery.DeliveryQueueController;
 import ru.study.shop.adapters.hibernate.OrderRepository;
 import ru.study.shop.entities.Customer;
 import ru.study.shop.entities.Order;
@@ -13,12 +16,18 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class OrderServiceImpl implements OrderService {
 
+    @Autowired
     private final OrderRepository orderRepository;
 
-    public OrderServiceImpl(OrderRepository orderRepository) {
+    @Autowired
+    private final DeliveryQueueController deliveryQueueController;
+
+    public OrderServiceImpl(OrderRepository orderRepository, DeliveryQueueController deliveryQueueController) {
         this.orderRepository = orderRepository;
+        this.deliveryQueueController = deliveryQueueController;
     }
 
     @Override
@@ -78,7 +87,15 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order saveOrder(Order order) {
-        return orderRepository.save(order);
+        boolean isNewOrder = order.getId() == null;
+
+        Order savedOrder = orderRepository.save(order);
+
+        if (isNewOrder) {
+            deliveryQueueController.setToDelivery(savedOrder, true);
+        }
+
+        return savedOrder;
     }
 
     @Override

@@ -52,7 +52,7 @@ public class OrderServiceImplTest {
 
     @Before
     public void setUp() {
-        orderService = new OrderServiceImpl(orderRepository);
+        orderService = new OrderServiceImpl(orderRepository, null);
     }
 
     @Test

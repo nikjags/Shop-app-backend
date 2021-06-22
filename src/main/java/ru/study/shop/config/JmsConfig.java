@@ -11,6 +11,7 @@ import org.springframework.jms.config.JmsListenerContainerFactory;
 import org.springframework.jms.support.converter.MappingJackson2MessageConverter;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessageType;
+import org.springframework.util.backoff.FixedBackOff;
 
 import javax.jms.ConnectionFactory;
 
@@ -21,12 +22,18 @@ public class JmsConfig {
     @Value("${spring.activemq.queues.config.recovery-interval}")
     private long recoveryInterval;
 
+    @Value("${spring.activemq.queues.config.backoff-attempts}")
+    private long backoffAttempts;
+
     @Bean
-    public JmsListenerContainerFactory<?> myFactory(ConnectionFactory connectionFactory,
+    public JmsListenerContainerFactory<?> customJmsListenerFactory(ConnectionFactory connectionFactory,
         DefaultJmsListenerContainerFactoryConfigurer configurer) {
 
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
+
+        factory.setBackOff(new FixedBackOff(FixedBackOff.DEFAULT_INTERVAL, backoffAttempts));
         factory.setRecoveryInterval(recoveryInterval);
+
         configurer.configure(factory, connectionFactory);
         return factory;
     }

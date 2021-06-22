@@ -20,7 +20,9 @@ public class OrderDeliveryResponseConsumer {
     @Autowired
     OrderService orderService;
 
-    @JmsListener(destination = "${spring.activemq.queues.delivery-response-queue-name}")
+    @JmsListener(
+        destination = "${spring.activemq.queues.delivery-response-queue-name}",
+        containerFactory = "customJmsListenerFactory")
     public void receiveMessage(Message message) {
 
         try {

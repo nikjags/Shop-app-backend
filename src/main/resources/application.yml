@@ -22,6 +22,7 @@ spring:
     queues:
       config:
         recovery-interval: 10000
+        backoff-attempts: 10
       delivery-request-queue-name: delivery-request-queue
       delivery-response-queue-name: delivery-response-queue
   banner:

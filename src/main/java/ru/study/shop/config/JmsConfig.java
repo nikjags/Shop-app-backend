@@ -22,8 +22,11 @@ public class JmsConfig {
     @Value("${spring.activemq.queues.config.recovery-interval}")
     private long recoveryInterval;
 
-    @Value("${spring.activemq.queues.config.backoff-attempts}")
+    @Value("${spring.activemq.queues.config.backoff.attempts}")
     private long backoffAttempts;
+
+    @Value("${spring.activemq.queues.config.backoff.interval}")
+    private long backoffInterval;
 
     @Bean
     public JmsListenerContainerFactory<?> customJmsListenerFactory(ConnectionFactory connectionFactory,
@@ -31,7 +34,7 @@ public class JmsConfig {
 
         DefaultJmsListenerContainerFactory factory = new DefaultJmsListenerContainerFactory();
 
-        factory.setBackOff(new FixedBackOff(FixedBackOff.DEFAULT_INTERVAL, backoffAttempts));
+        factory.setBackOff(new FixedBackOff(backoffInterval, backoffAttempts));
         factory.setRecoveryInterval(recoveryInterval);
 
         configurer.configure(factory, connectionFactory);

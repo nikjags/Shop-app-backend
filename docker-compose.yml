@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  active-mq:
+    image: rmohr/activemq:latest
+    ports:
+    - 61616:61616
+    - 8161:8161
+
+  backend-main-app:
+    image: nikjag/shop-app-backend:version-1.4.0
+    ports:
+    - 8080:8080
+    command: ./mvnw spring-boot:run -Dspring-boot.run.arguments=--spring.activemq.broker-url="tcp://active-mq:61616"
+
+  backend-delivery-app:
+    image: nikjag/delivery-app:version-1.1.0
+    command: ./mvnw exec:java -Dexec.args="active-mq" # give the app a host name of active-mq container

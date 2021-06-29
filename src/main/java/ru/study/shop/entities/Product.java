@@ -1,12 +1,18 @@
 package ru.study.shop.entities;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 
 @Entity
-@Data
 @Table(name = "PRODUCT")
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,9 +24,6 @@ public class Product {
     private String manufacturer;
     private String description;
     private Long price;
-
-    public Product() {
-    }
 
     public Product(
         String productName,

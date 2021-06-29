@@ -1,7 +1,10 @@
 package ru.study.shop.entities;
 
 import com.fasterxml.jackson.annotation.*;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -9,8 +12,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Data
 @Table(name = "orders")
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 @JsonPropertyOrder({"orderId", "customerId", "products", "orderedTime", "delivered"})
 public class Order {
     @Id
@@ -37,9 +43,6 @@ public class Order {
     private LocalDateTime orderedTime;
 
     private boolean delivered;
-
-    public Order() {
-    }
 
     public Order(Customer customer, List<Product> productList, LocalDateTime orderedTime, boolean delivered) {
         this.customer = customer;

@@ -2,17 +2,19 @@ package ru.study.shop.entities;
 
 import com.fasterxml.jackson.annotation.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.NaturalId;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "STOCK")
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 @JsonPropertyOrder({"productId", "size", "quantity"})
 public class Stock {
     @Id
